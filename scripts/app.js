@@ -18,6 +18,10 @@
  *
 */
 
+//Inspired by http://buildnewgames.com/webgl-threejs/
+
+'use strict';
+
 //This is an inclination sensor that uses RelativeOrientationSensor and converts the quaternion to Euler angles
 class RelativeInclinationSensor {
         constructor() {
@@ -104,6 +108,11 @@ const maxScore = 7;
 //Opponent difficulty (between 0 and 1)
 var difficulty = 0.2;
 
+//For the scoreboard canvas
+var canvas1 = null;
+var context1 = null;
+var texture1 = null;
+
 //Service worker registration
 if ('serviceWorker' in navigator) {
         window.addEventListener('load', function() {
@@ -122,12 +131,6 @@ function init()
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio( window.devicePixelRatio );
 	scene.add(camera);
-	// set a default position for the camera
-	// not doing this somehow messes up shadow rendering
-	//camera.position.z = 320;
-
-	//Tell the player what score is needed to win
-	document.getElementById("winnerBoard").innerHTML = "First to " + maxScore + " wins!";
 	
 	//Set up all the objects in the scene (table, ball, paddles)	
 	createScene();
@@ -140,65 +143,59 @@ function init()
         window.addEventListener( 'resize', onWindowResize, false );     //On window resize, also resize canvas so it fills the screen
 
         function onWindowResize() {
-                //camera.aspect = window.innerWidth / window.innerHeight;
                 camera.updateProjectionMatrix();
                 renderer.setSize( window.innerWidth , window.innerHeight);
         }
 	
 	render();
-        timerVar=setInterval(function(){time = time + 10;},10);  //timer in ms, lowest possible value is 10, accurate enough though
+        timerVar=setInterval(function(){time = time + 10;},10);  //Timer in ms, lowest possible value is 10, accurate enough though
 }
 
-function createScene()
+function createScene()  //A modified version of the scene from http://buildnewgames.com/webgl-threejs/
 {
-	// set up the playing surface plane 
-	var planeWidth = fieldWidth,
+	//Set up the playing surface plane 
+	let planeWidth = fieldWidth,
 		planeHeight = fieldHeight,
 		planeQuality = 10;
 		
-	// create the paddle1's material
-	var paddle1Material =
+	//Create materials for the objects
+	let paddle1Material =
 	  new THREE.MeshLambertMaterial(
 		{
-		  color: 0x1B32C0
+		  color: "blue"
 		});
-	// create the paddle2's material
-	var paddle2Material =
+	let paddle2Material =
 	  new THREE.MeshLambertMaterial(
 		{
-		  color: 0xFF4045
+		  color: "red"
 		});
-	// create the plane's material	
-	var planeMaterial =
+	let planeMaterial =
 	  new THREE.MeshLambertMaterial(
 		{
-		  color: 0x4BD121
+		  color: "green"
 		});
-	// create the table's material
-	var tableMaterial =
+	let tableMaterial =
 	  new THREE.MeshLambertMaterial(
 		{
-		  color: 0x111111
+		  color: "black"
 		});
-	// create the pillar's material
-	var pillarMaterial =
+	let pillarMaterial =
 	  new THREE.MeshLambertMaterial(
 		{
-		  color: 0x534d0d
+		  color: "orange"
 		});
-	// create the ground's material
-	var groundMaterial =
+	let groundMaterial =
 	  new THREE.MeshLambertMaterial(
 		{
-		  color: 0x888888
+		  color: "burlywood"
 		});
 		
 		
-	// create the playing surface plane
+	//Create the playing surface plane
 	var plane = new THREE.Mesh(
 
 	  new THREE.PlaneGeometry(
-		planeWidth * 0.95,	// 95% of table width, since we want to show where the ball goes out-of-bounds
+		planeWidth * 0.95,	//95% of table width, since we want to show where the ball goes out of bounds
 		planeHeight,
 		planeQuality,
 		planeQuality),
@@ -208,55 +205,39 @@ function createScene()
 	scene.add(plane);
 	plane.receiveShadow = true;	
 	
-	var table = new THREE.Mesh(
+	let table = new THREE.Mesh(
 
 	  new THREE.CubeGeometry(
-		planeWidth * 1.05,	// this creates the feel of a billiards table, with a lining
+		planeWidth * 1.05,
 		planeHeight * 1.03,
-		100,				// an arbitrary depth, the camera can't see much of it anyway
+		100,
 		planeQuality,
 		planeQuality,
 		1),
 
 	  tableMaterial);
-	table.position.z = -51;	// we sink the table into the ground by 50 units. The extra 1 is so the plane can be seen
+	table.position.z = -51;
 	scene.add(table);
 	table.receiveShadow = true;	
 		
-	// set up the sphere vars
-	// lower 'segment' and 'ring' values will increase performance
-	var radius = 5,
-		segments = 6,
-		rings = 6;
-		
-	// // create the sphere's material
-	var sphereMaterial =
+	//Create the ball
+	let sphereMaterial =
 	  new THREE.MeshLambertMaterial(
 		{
-		  color: 0xD43001
+		  color: "white"
 		});
-		
-	// Create a ball with sphere geometry
-	ball = new THREE.Mesh(
+        let radius = 5;
+	ball = new THREE.Mesh(new THREE.SphereGeometry(radius, 6, 6), sphereMaterial);
 
-	  new THREE.SphereGeometry(
-		radius,
-		segments,
-		rings),
-
-	  sphereMaterial);
-
-	// add the ball to the scene
 	scene.add(ball);
 	
 	ball.position.x = 0;
 	ball.position.y = 0;
-	// set ball above the table surface
 	ball.position.z = radius;
 	ball.receiveShadow = true;
-    ball.castShadow = true;
+        ball.castShadow = true;
 	
-	// // set up the paddle vars
+	//Paddle vars
 	paddleWidth = 10;
 	paddleHeight = 30;
 	paddleDepth = 10;
@@ -279,20 +260,16 @@ function createScene()
 		paddleGeom,
                 paddle2Material);
 
-	// add the paddles to the scene
 	scene.add(paddle1);  
 	scene.add(paddle2);
 	
-	// set paddles on each side of the table
+	//Position the paddles
 	paddle1.position.x = -fieldWidth/2 + paddleWidth;
 	paddle2.position.x = fieldWidth/2 - paddleWidth;
-	
-	// lift paddles over playing surface
 	paddle1.position.z = paddleDepth;
 	paddle2.position.z = paddleDepth;
 		
-	// we iterate 10x (5x each side) to create pillars to show off shadows
-	// this is for the pillars on the left
+        //Create pillars
 	for (var i = 0; i < 5; i++)
 	{
 		var backdrop = new THREE.Mesh(
@@ -314,8 +291,6 @@ function createScene()
 		backdrop.receiveShadow = true;		  
 		scene.add(backdrop);	
 	}
-	// we iterate 10x (5x each side) to create pillars to show off shadows
-	// this is for the pillars on the right
 	for (var i = 0; i < 5; i++)
 	{
 		var backdrop = new THREE.Mesh(
@@ -338,9 +313,8 @@ function createScene()
 		scene.add(backdrop);	
 	}
 	
-	// finally we finish by adding a ground plane
-	// to show off pretty shadows
-	var ground = new THREE.Mesh(
+	//Add a ground plane for decoration
+	let ground = new THREE.Mesh(
 
 	  new THREE.CubeGeometry( 
 	  1000, 
@@ -349,28 +323,51 @@ function createScene()
 	  1, 
 	  1,
 	  1 ),
-
 	  groundMaterial);
-    // set ground to arbitrary z position to best show off shadowing
 	ground.position.z = -132;
 	ground.receiveShadow = true;	
 	scene.add(ground);		
 		
-	// // create a point light
-	pointLight =
-	  new THREE.PointLight(0xF8D898);
-
-	// set its position
+	//Create a point light to make the scene look nicer
+	pointLight = new THREE.PointLight(0xF8D898);
 	pointLight.position.x = -1000;
 	pointLight.position.y = 0;
 	pointLight.position.z = 1000;
 	pointLight.intensity = 2.9;
 	pointLight.distance = 10000;
-	// add to the scene
 	scene.add(pointLight);
-	
-	// MAGIC SHADOW CREATOR DELUXE EDITION with Lights PackTM DLC
-	renderer.shadowMapEnabled = true;		
+
+	//Scoreboard
+	canvas1 = document.createElement('canvas');
+	context1 = canvas1.getContext('2d');
+	context1.fillStyle = "rgba(255,255,255,0.95)";
+        context1.textAlign="center";
+        context1.textBaseline = 'middle';
+	//Tell the player what score is needed to win
+	context1.font = "Bold 20px Arial";
+	context1.fillText("First to " + maxScore + " wins", canvas1.width/2, canvas1.height/2);
+	context1.font = "Bold 40px Arial";
+        //context1.fillText(score1 + '-' + score2, canvas1.width/2, canvas1.height/2);
+    
+	//Canvas contents will be used for a texture
+	texture1 = new THREE.Texture(canvas1);
+        texture1.minFilter = THREE.LinearFilter;
+	texture1.needsUpdate = true;
+      
+        let material1 = new THREE.MeshBasicMaterial( {map: texture1, side:THREE.DoubleSide } );
+        material1.transparent = true;
+
+        let mesh1 = new THREE.Mesh(
+        new THREE.PlaneGeometry(canvas1.width, canvas1.height),
+        material1
+        );
+	mesh1.position.set(fieldWidth/2, 0, 40);
+	scene.add( mesh1 );
+        //Rotate the text so it faces the player
+        mesh1.rotateZ(-Math.PI/2);
+        mesh1.rotateX(Math.PI/2);
+
+	renderer.shadowMap.enabled = true;		
 }
 
 function render()
@@ -388,27 +385,28 @@ function render()
 function ballPhysics()
 {
         ballSpeed = ballSpeedInitial + (ballSpeedInitial * time/10000); //Increase ball speed with time
-	//Ball goes off the player's side
+	//Ball goes off the player's side - opponent scores
 	if (ball.position.x <= -fieldWidth/2)
 	{	
-		//Opponent scores
 		score2++;
 		//Update scoreboard
-		document.getElementById("scores").innerHTML = score1 + "-" + score2;
+                context1.clearRect(0, 0, canvas1.width, canvas1.height);
+                context1.fillText(score1 + '-' + score2, canvas1.width/2, canvas1.height/2);
+                texture1.needsUpdate = true;
 		resetBall(2);
                 time = 0;       //Reset timer
-		matchScoreCheck();	
+		matchScoreCheck();
 	}	
-	//Ball goes off the CPU's side
+	//Ball goes off the CPU's side - player scores
 	else if (ball.position.x >= fieldWidth/2)
 	{	
-		//Player scores
 		score1++;
-		//Update scoreboard
-		document.getElementById("scores").innerHTML = score1 + "-" + score2;
+                context1.clearRect(0, 0, canvas1.width, canvas1.height);
+                context1.fillText(score1 + '-' + score2, canvas1.width/2, canvas1.height/2);
+                texture1.needsUpdate = true;
 		resetBall(1);
-                time = 0;       //Reset timer
-		matchScoreCheck();	
+                time = 0;
+		matchScoreCheck();
 	}
 	
 	//Bounce off table border to keep the ball on the table
@@ -425,7 +423,7 @@ function ballPhysics()
 	ball.position.x += ballDirX * ballSpeed;
 	ball.position.y += ballDirY * ballSpeed;
 	
-	//Limit ball's y-speed to make it easier (ball does not get huge speed in left-right direction)
+	//Limit ball's y-speed to make it easier (ball does not go too fast in left-right direction)
         let maxYSpeed = Math.max(2 * ballSpeedInitial, ballSpeed * 1.2);
 	if (ballDirY > maxYSpeed)
 	{
@@ -598,14 +596,18 @@ function matchScoreCheck()
 	{
 		//Stop the ball
 		ballSpeed = 0;
-		document.getElementById("scores").innerHTML = "Player wins!";		
-		document.getElementById("winnerBoard").innerHTML = "Refresh to play again";
+                context1.clearRect(0, 0, canvas1.width, canvas1.height);
+	        context1.font = "Bold 20px Arial";
+                context1.fillText("You win, congratulations!", canvas1.width/2, canvas1.height/2);
+                texture1.needsUpdate = true;
 	}
 	//If opponent has max points
 	else if (score2 >= maxScore)
 	{
 		ballSpeed = 0;
-		document.getElementById("scores").innerHTML = "CPU wins!";
-		document.getElementById("winnerBoard").innerHTML = "Refresh to play again";
+                context1.clearRect(0, 0, canvas1.width, canvas1.height);
+	        context1.font = "Bold 20px Arial";
+                context1.fillText("Opponent wins!", canvas1.width/2, canvas1.height/2);
+                texture1.needsUpdate = true;
 	}
 }
