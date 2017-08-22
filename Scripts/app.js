@@ -67,6 +67,7 @@ class RelativeInclinationSensor {
 }
 
 const container = document.getElementById("gameCanvas");
+//var sensor = new RelativeInclinationSensor();
 //Required for a THREE.js scene
 var renderer = new THREE.WebGLRenderer();
 var scene = new THREE.Scene();
@@ -112,6 +113,17 @@ function init()
 	
 	// set up all the 3D objects in the scene	
 	createScene();
+
+        //Sensor initialization
+        sensor.start();
+
+        window.addEventListener( 'resize', onWindowResize, false );     //On window resize, also resize canvas so it fills the screen
+
+        function onWindowResize() {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize( window.innerWidth , window.innerHeight);
+        }
 	
 	// and let's get cracking!
 	render();
