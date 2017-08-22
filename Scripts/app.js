@@ -67,8 +67,11 @@ class RelativeInclinationSensor {
 }
 
 const container = document.getElementById("gameCanvas");
-// scene object variables
-var renderer, scene, pointLight, spotLight;
+//Required for a THREE.js scene
+var renderer = new THREE.WebGLRenderer();
+var scene = new THREE.Scene();
+
+var pointLight, spotLight;
 // set the scene size
 const WIDTH = 640;
 const HEIGHT = 360;
@@ -116,13 +119,6 @@ function init()
 
 function createScene()
 {
-
-	// create a WebGL renderer, camera
-	// and a scene
-	renderer = new THREE.WebGLRenderer();
-
-	scene = new THREE.Scene();
-
 	// add the camera to the scene
 	scene.add(camera);
 	
@@ -130,7 +126,7 @@ function createScene()
 	// not doing this somehow messes up shadow rendering
 	camera.position.z = 320;
 	
-	// start the renderer
+        //ThreeJS scene setup below
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio( window.devicePixelRatio );
 
