@@ -1,15 +1,20 @@
 <!doctype html>
 <html>
 	<head>
+                <link rel="manifest" href="manifest.json" />
+                <meta charset="utf-8">
+                <meta name="viewport" content="user-scalable=no, initial-scale=1">
 		<title>Game</title>
 		<style>
 			body {
 				background-color: black;
+                                margin: 0;
 			}
 			#gameCanvas {
 				background-color: black;
-				width: 640px;
-				height: 360px;
+                                display: block;  /* prevents scrollbar */
+                                width: 100vw;
+                                height: 100vh;
 				margin: auto;
 				align: center;
 			}
@@ -30,7 +35,7 @@
 			}
 		</style>
 	</head>
-	<body onload='setup();'>
+	<body onload='init();'>
 		<div id='gameCanvas'></div>
 		<script src='./Scripts/three.min.js'></script>
 		<script src='./Scripts/app.js'></script>
