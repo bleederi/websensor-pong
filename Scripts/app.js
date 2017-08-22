@@ -397,18 +397,17 @@ function ballPhysics()
 		matchScoreCheck();	
 	}
 	
-	// if ball goes off the top side (side of table)
+	//Bounce off table border to keep the ball on the table
 	if (ball.position.y <= -fieldHeight/2)
 	{
 		ballDirY = -ballDirY;
 	}	
-	// if ball goes off the bottom side (side of table)
-	if (ball.position.y >= fieldHeight/2)
+	else if (ball.position.y >= fieldHeight/2)
 	{
 		ballDirY = -ballDirY;
 	}
 	
-	// update ball position over time
+	//Move the ball
 	ball.position.x += ballDirX * ballSpeed;
 	ball.position.y += ballDirY * ballSpeed;
 	
@@ -458,7 +457,7 @@ function opponentPaddleMovement()
 }
 
 
-// Handles player's paddle movement
+// Handles player's paddle movement - TODO: Use sensors
 function playerPaddleMovement()
 {
 /*	// move left
@@ -589,18 +588,18 @@ function resetBall(loser)
 	ball.position.x = 0;
 	ball.position.y = 0;
 	
-	// if player lost the last point, we send the ball to opponent
+	//If player lost the last point, we send the ball to opponent
 	if (loser == 1)
 	{
 		ballDirX = -1;
 	}
-	// else if opponent lost, we send ball to player
+	//If opponent lost, we send ball to player
 	else
 	{
 		ballDirX = 1;
 	}
 	
-	// set the ball to move +ve in y plane (towards left from the camera)
+	//Set the ball to move +ve in y plane (towards left from the camera)
 	ballDirY = 1;
 }
 
