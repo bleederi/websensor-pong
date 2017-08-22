@@ -10,14 +10,11 @@
 				background-color: black;
                                 margin: 0;
 			}
-			#gameCanvas {
-				background-color: black;
+                        canvas {
                                 display: block;  /* prevents scrollbar */
                                 width: 100vw;
                                 height: 100vh;
-				margin: auto;
-				align: center;
-			}
+                        }
 			#scoreboard {
 				text-align: center;
 				font-family: Segoe UI, Helvetica, Ubuntu, sans-serif;
@@ -34,10 +31,10 @@
 				color: black;
 			}
 		</style>
+		<script src='./Scripts/three.min.js'></script>
 	</head>
 	<body onload='init();'>
 		<div id='gameCanvas'></div>
-		<script src='./Scripts/three.min.js'></script>
 		<script src='./Scripts/app.js'></script>
 		<div id='scoreboard'>
 			<h1 id='scores'>0-0</h1>

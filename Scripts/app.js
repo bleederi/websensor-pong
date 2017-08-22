@@ -67,18 +67,15 @@ class RelativeInclinationSensor {
 }
 
 const container = document.getElementById("gameCanvas");
-//var sensor = new RelativeInclinationSensor();
+var oriSensor = new RelativeInclinationSensor();
 //Required for a THREE.js scene
 var renderer = new THREE.WebGLRenderer();
 var scene = new THREE.Scene();
 
 var pointLight, spotLight;
-// set the scene size
-const WIDTH = 640;
-const HEIGHT = 360;
 // set some camera attributes
 const FOV = 50;
-const ASPECT = WIDTH / HEIGHT;
+const ASPECT = 640 / 360;
 const NEAR = 0.1;
 const FAR = 10000;
 var camera = new THREE.PerspectiveCamera(FOV, ASPECT, NEAR, FAR);
@@ -92,7 +89,14 @@ var paddle1DirY = 0, paddle2DirY = 0, paddleSpeed = 3;
 
 // ball variables
 var ball, paddle1, paddle2;
-var ballDirX = 1, ballDirY = 1, ballSpeed = 2;
+var ballDirX = 1, ballDirY = 1;
+
+const ballSpeedInitial = 2;     //We want to store the initial ball speed value for later use
+var ballSpeed = ballSpeedInitial;
+
+//Timer
+var time=0;
+var timerVar = null;
 
 // game-related variables
 var score1 = 0, score2 = 0;
@@ -102,31 +106,50 @@ var maxScore = 7;
 // set opponent reflexes (0 - easiest, 1 - hardest)
 var difficulty = 0.2;
 
+//Service worker registration
+if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+                navigator.serviceWorker.register('sw.js').then(function(registration) {
+                        //Registration was successful
+                }, function(err) {
+                        //Registration failed
+                console.log('ServiceWorker registration failed: ', err);
+                });
+        });
+}
+
 // ------------------------------------- //
 // ------- GAME FUNCTIONS -------------- //
 // ------------------------------------- //
 
 function init()
 {
+
+        //ThreeJS scene setup below
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio( window.devicePixelRatio );
+
 	// update the board to reflect the max score for match win
 	document.getElementById("winnerBoard").innerHTML = "First to " + maxScore + " wins!";
 	
 	// set up all the 3D objects in the scene	
 	createScene();
 
+        container.innerHTML = "";
+	container.appendChild(renderer.domElement);
         //Sensor initialization
-        sensor.start();
+        oriSensor.start();
 
         window.addEventListener( 'resize', onWindowResize, false );     //On window resize, also resize canvas so it fills the screen
 
         function onWindowResize() {
-                camera.aspect = window.innerWidth / window.innerHeight;
+                //camera.aspect = window.innerWidth / window.innerHeight;
                 camera.updateProjectionMatrix();
                 renderer.setSize( window.innerWidth , window.innerHeight);
         }
 	
-	// and let's get cracking!
 	render();
+        timerVar=setInterval(function(){time = time + 10;},10);  //timer in ms, lowest possible value is 10, accurate enough though
 }
 
 function createScene()
@@ -137,13 +160,6 @@ function createScene()
 	// set a default position for the camera
 	// not doing this somehow messes up shadow rendering
 	camera.position.z = 320;
-	
-        //ThreeJS scene setup below
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio( window.devicePixelRatio );
-
-	// attach the render-supplied DOM element
-	container.appendChild(renderer.domElement);
 
 	// set up the playing surface plane 
 	var planeWidth = fieldWidth,
@@ -381,6 +397,7 @@ function render()
 
 function ballPhysics()
 {
+        ballSpeed = ballSpeedInitial + (2 * time/10000); //Increase ball speed with time
 	// if ball goes off the 'left' side (Player's side)
 	if (ball.position.x <= -fieldWidth/2)
 	{	
@@ -461,45 +478,62 @@ function opponentPaddleMovement()
 	// this is done because we stretch the paddle at some points
 	// stretching is done when paddle touches side of table and when paddle hits ball
 	// by doing this here, we ensure paddle always comes back to default size
-	paddle2.scale.y += (1 - paddle2.scale.y) * 0.2;	
+	//paddle2.scale.y += (1 - paddle2.scale.y) * 0.2;	
 }
 
 
 // Handles player's paddle movement - TODO: Use sensors
 function playerPaddleMovement()
 {
-/*	// move left
-	if (Key.isDown(Key.A))		
+        let direction = null;
+        let force = 0;
+        switch(screen.orientation.angle) {
+                default:
+                case 0:
+                        oriSensor.y < 0 ? direction = "left" : direction = "right";
+                        force = Math.abs(oriSensor.y);
+                break;
+                case 90:
+                        oriSensor.x < 0 ? direction = "left" : direction = "right";
+                        force = Math.abs(oriSensor.x);
+                break;
+                case 270:
+                        oriSensor.x < 0 ? direction = "right" : direction = "left";
+                        force = Math.abs(oriSensor.x);
+                break;
+                }
+	// move left
+	if (direction === "left")		
 	{
 		// if paddle is not touching the side of table
 		// we move
 		if (paddle1.position.y < fieldHeight * 0.45)
 		{
-			paddle1DirY = paddleSpeed * 0.5;
+			paddle1DirY = paddleSpeed * force;
 		}
 		// else we don't move and stretch the paddle
 		// to indicate we can't move
 		else
 		{
 			paddle1DirY = 0;
-			paddle1.scale.z += (10 - paddle1.scale.z) * 0.2;
+			//paddle1.scale.z += (10 - paddle1.scale.z) * 0.2;
 		}
 	}	
 	// move right
-	else if (Key.isDown(Key.D))
+	else if (direction === "right")
 	{
 		// if paddle is not touching the side of table
 		// we move
 		if (paddle1.position.y > -fieldHeight * 0.45)
 		{
-			paddle1DirY = -paddleSpeed * 0.5;
+			paddle1DirY = -paddleSpeed * force;
 		}
 		// else we don't move and stretch the paddle
 		// to indicate we can't move
 		else
 		{
 			paddle1DirY = 0;
-			paddle1.scale.z += (10 - paddle1.scale.z) * 0.2;
+			//paddle1.scale.z += (10 - paddle1.scale.z) * 0.2;
 		}
 	}
 	// else don't move paddle
@@ -508,9 +542,8 @@ function playerPaddleMovement()
 		// stop the paddle
 		paddle1DirY = 0;
 	}
-	*/
-	paddle1.scale.y += (1 - paddle1.scale.y) * 0.2;	
-	paddle1.scale.z += (1 - paddle1.scale.z) * 0.2;	
+	//paddle1.scale.y += (1 - paddle1.scale.y) * 0.2;	
+	//paddle1.scale.z += (1 - paddle1.scale.z) * 0.2;	
 	paddle1.position.y += paddle1DirY;
 }
 
@@ -551,12 +584,11 @@ function paddlePhysics()
 			if (ballDirX < 0)
 			{
 				// stretch the paddle to indicate a hit
-				paddle1.scale.y = 15;
+				//paddle1.scale.y = 15;
 				// switch direction of ball travel to create bounce
 				ballDirX = -ballDirX;
-				// we impact ball angle when hitting it
-				// this is not realistic physics, just spices up the gameplay
-				// allows you to 'slice' the ball to beat the opponent
+				//Impact ball angle when hitting it to make it possible to direct the ball
+
 				ballDirY -= paddle1DirY * 0.7;
 			}
 		}
@@ -578,12 +610,10 @@ function paddlePhysics()
 			if (ballDirX > 0)
 			{
 				// stretch the paddle to indicate a hit
-				paddle2.scale.y = 15;	
+				//paddle2.scale.y = 15;	
 				// switch direction of ball travel to create bounce
 				ballDirX = -ballDirX;
-				// we impact ball angle when hitting it
-				// this is not realistic physics, just spices up the gameplay
-				// allows you to 'slice' the ball to beat the opponent
+				//Impact ball angle when hitting it to make it possible to direct the ball
 				ballDirY -= paddle2DirY * 0.7;
 			}
 		}
@@ -592,7 +622,7 @@ function paddlePhysics()
 
 function resetBall(loser)
 {
-	// position the ball in the center of the table
+	//Reset ball position
 	ball.position.x = 0;
 	ball.position.y = 0;
 	
