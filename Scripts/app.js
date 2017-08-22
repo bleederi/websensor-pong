@@ -68,7 +68,16 @@ class RelativeInclinationSensor {
 
 const container = document.getElementById("gameCanvas");
 // scene object variables
-var renderer, scene, camera, pointLight, spotLight;
+var renderer, scene, pointLight, spotLight;
+// set the scene size
+const WIDTH = 640;
+const HEIGHT = 360;
+// set some camera attributes
+const FOV = 50;
+const ASPECT = WIDTH / HEIGHT;
+const NEAR = 0.1;
+const FAR = 10000;
+var camera = new THREE.PerspectiveCamera(FOV, ASPECT, NEAR, FAR);
 
 // field variables
 var fieldWidth = 400, fieldHeight = 200;
@@ -107,25 +116,10 @@ function init()
 
 function createScene()
 {
-	// set the scene size
-	var WIDTH = 640,
-	  HEIGHT = 360;
-
-	// set some camera attributes
-	var VIEW_ANGLE = 50,
-	  ASPECT = WIDTH / HEIGHT,
-	  NEAR = 0.1,
-	  FAR = 10000;
 
 	// create a WebGL renderer, camera
 	// and a scene
 	renderer = new THREE.WebGLRenderer();
-	camera =
-	  new THREE.PerspectiveCamera(
-		VIEW_ANGLE,
-		ASPECT,
-		NEAR,
-		FAR);
 
 	scene = new THREE.Scene();
 
