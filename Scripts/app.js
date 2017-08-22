@@ -44,6 +44,9 @@ function setup()
 function draw()
 {
 
+	// draw THREE.JS scene
+renderer.render(scene, camera);
+
 requestAnimationFrame(draw);
 
 }
