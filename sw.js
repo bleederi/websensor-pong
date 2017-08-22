@@ -9,9 +9,7 @@ self.addEventListener('install', function(event) {
         'index.html',
         'sw.js',
         'scripts/app.js',
-        'scripts/three.min.js',
-        'resources/beach_dinner.jpg',
-        'resources/ocean.mp3',
+        'scripts/three.min.js'
       ]);
     })
   );
@@ -30,8 +28,6 @@ this.addEventListener('fetch', function(event) {
                         cache.put(event.request, responseClone);
                 });
                 return response;
-                }).catch(function () {
-                        return caches.match('resources/beach_dinner.jpg');      //Fallback
                 });
                 }
         }));
