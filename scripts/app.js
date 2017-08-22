@@ -1,13 +1,23 @@
+/*
+ * Websensor Pong demo
+ * https://github.com/jessenie-intel/websensor-pong
+ *
+ * Copyright (c) 2017 Jesse Nieminen
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+*/
 
-// --------------------------------------------- //
-// ------- 3D PONG built with Three.JS --------- //
-// -------- Created by Nikhil Suresh ----------- //
-// -------- Three.JS is by Mr. doob  ----------- //
-// --------------------------------------------- //
-
-// ------------------------------------- //
-// ------- GLOBAL VARIABLES ------------ //
-// ------------------------------------- //
 //This is an inclination sensor that uses RelativeOrientationSensor and converts the quaternion to Euler angles
 class RelativeInclinationSensor {
         constructor() {
@@ -15,8 +25,6 @@ class RelativeInclinationSensor {
         this.x_ = 0;
         this.y_ = 0;
         this.z_ = 0;
-        this.longitudeInitial_ = 0;
-        this.initialoriobtained_ = false;
         this.sensor_.onreading = () => {
                 let quat = this.sensor_.quaternion;
                 let quaternion = new THREE.Quaternion();        //Conversion to Euler angles done in THREE.js so we have to create a THREE.js object for holding the quaternion to convert from
@@ -29,15 +37,6 @@ class RelativeInclinationSensor {
                 this.x_ = euler.x;
                 this.y_ = euler.y;
                 this.z_ = euler.z;
-                if(!this.initialoriobtained_) //obtain initial longitude - needed to make the initial camera orientation the same every time
-                {
-                        this.longitudeInitial_ = -this.z_;
-                        if(screen.orientation.angle === 90)
-                        {
-                                this.longitudeInitial_ = this.longitudeInitial_ + Math.PI/2;     //offset fix
-                        }
-                        this.initialoriobtained_ = true;
-                }
                 if (this.onreading_) this.onreading_();
         };
         }
@@ -52,9 +51,6 @@ class RelativeInclinationSensor {
         get z() {
                 return this.z_;
         }
-        get longitudeInitial() {
-                return this.longitudeInitial_;
-        }
         set onactivate(func) {
                 this.sensor_.onactivate_ = func;
         }
@@ -68,12 +64,14 @@ class RelativeInclinationSensor {
 
 const container = document.getElementById("gameCanvas");
 var oriSensor = new RelativeInclinationSensor();
+
 //Required for a THREE.js scene
 var renderer = new THREE.WebGLRenderer();
 var scene = new THREE.Scene();
 
 var pointLight, spotLight;
-// set some camera attributes
+
+//Create camera
 const FOV = 50;
 const ASPECT = 640 / 360;
 const NEAR = 0.1;
@@ -85,7 +83,7 @@ var fieldWidth = 400, fieldHeight = 200;
 
 // paddle variables
 var paddleWidth, paddleHeight, paddleDepth, paddleQuality;
-var paddle1DirY = 0, paddle2DirY = 0, paddleSpeed = 3;
+var paddle1DirY = 0, paddle2DirY = 0, paddleSpeed = 8;
 
 // ball variables
 var ball, paddle1, paddle2;
@@ -98,12 +96,12 @@ var ballSpeed = ballSpeedInitial;
 var time=0;
 var timerVar = null;
 
-// game-related variables
-var score1 = 0, score2 = 0;
-// you can change this to any positive whole number
-var maxScore = 7;
+//Scores
+var score1 = 0; //Player's score
+var score2 = 0; //Opponent's score
+const maxScore = 7;
 
-// set opponent reflexes (0 - easiest, 1 - hardest)
+//Opponent difficulty (between 0 and 1)
 var difficulty = 0.2;
 
 //Service worker registration
@@ -118,21 +116,20 @@ if ('serviceWorker' in navigator) {
         });
 }
 
-// ------------------------------------- //
-// ------- GAME FUNCTIONS -------------- //
-// ------------------------------------- //
-
 function init()
 {
-
         //ThreeJS scene setup below
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio( window.devicePixelRatio );
+	scene.add(camera);
+	// set a default position for the camera
+	// not doing this somehow messes up shadow rendering
+	//camera.position.z = 320;
 
-	// update the board to reflect the max score for match win
+	//Tell the player what score is needed to win
 	document.getElementById("winnerBoard").innerHTML = "First to " + maxScore + " wins!";
 	
-	// set up all the 3D objects in the scene	
+	//Set up all the objects in the scene (table, ball, paddles)	
 	createScene();
 
         container.innerHTML = "";
@@ -154,13 +151,6 @@ function init()
 
 function createScene()
 {
-	// add the camera to the scene
-	scene.add(camera);
-	
-	// set a default position for the camera
-	// not doing this somehow messes up shadow rendering
-	camera.position.z = 320;
-
 	// set up the playing surface plane 
 	var planeWidth = fieldWidth,
 		planeHeight = fieldHeight,
@@ -397,28 +387,27 @@ function render()
 
 function ballPhysics()
 {
-        ballSpeed = ballSpeedInitial + (2 * time/10000); //Increase ball speed with time
-	// if ball goes off the 'left' side (Player's side)
+        ballSpeed = ballSpeedInitial + (ballSpeedInitial * time/10000); //Increase ball speed with time
+	//Ball goes off the player's side
 	if (ball.position.x <= -fieldWidth/2)
 	{	
-		// CPU scores
+		//Opponent scores
 		score2++;
-		// update scoreboard HTML
+		//Update scoreboard
 		document.getElementById("scores").innerHTML = score1 + "-" + score2;
-		// reset ball to center
 		resetBall(2);
+                time = 0;       //Reset timer
 		matchScoreCheck();	
-	}
-	
-	// if ball goes off the 'right' side (CPU's side)
-	if (ball.position.x >= fieldWidth/2)
+	}	
+	//Ball goes off the CPU's side
+	else if (ball.position.x >= fieldWidth/2)
 	{	
-		// Player scores
+		//Player scores
 		score1++;
-		// update scoreboard HTML
+		//Update scoreboard
 		document.getElementById("scores").innerHTML = score1 + "-" + score2;
-		// reset ball to center
 		resetBall(1);
+                time = 0;       //Reset timer
 		matchScoreCheck();	
 	}
 	
@@ -436,20 +425,19 @@ function ballPhysics()
 	ball.position.x += ballDirX * ballSpeed;
 	ball.position.y += ballDirY * ballSpeed;
 	
-	// limit ball's y-speed to 2x the x-speed
-	// this is so the ball doesn't speed from left to right super fast
-	// keeps game playable for humans
-	if (ballDirY > ballSpeed * 2)
+	//Limit ball's y-speed to make it easier (ball does not get huge speed in left-right direction)
+        let maxYSpeed = Math.max(2 * ballSpeedInitial, ballSpeed * 1.2);
+	if (ballDirY > maxYSpeed)
 	{
-		ballDirY = ballSpeed * 2;
+		ballDirY = maxYSpeed;
 	}
-	else if (ballDirY < -ballSpeed * 2)
+	else if (ballDirY < -maxYSpeed)
 	{
-		ballDirY = -ballSpeed * 2;
+		ballDirY = -maxYSpeed;
 	}
 }
 
-// Handles CPU paddle movement and logic
+// Handles opponent paddle movement and logic
 function opponentPaddleMovement()
 {
 	// Lerp towards the ball on the y plane
@@ -474,15 +462,10 @@ function opponentPaddleMovement()
 			paddle2.position.y -= paddleSpeed;
 		}
 	}
-	// We lerp the scale back to 1
-	// this is done because we stretch the paddle at some points
-	// stretching is done when paddle touches side of table and when paddle hits ball
-	// by doing this here, we ensure paddle always comes back to default size
-	//paddle2.scale.y += (1 - paddle2.scale.y) * 0.2;	
 }
 
 
-// Handles player's paddle movement - TODO: Use sensors
+// Handles player's paddle movement
 function playerPaddleMovement()
 {
         let direction = null;
@@ -502,58 +485,40 @@ function playerPaddleMovement()
                         force = Math.abs(oriSensor.x);
                 break;
                 }
-	// move left
 	if (direction === "left")		
 	{
-		// if paddle is not touching the side of table
-		// we move
+		//If paddle is not touching the side of table then move
 		if (paddle1.position.y < fieldHeight * 0.45)
 		{
 			paddle1DirY = paddleSpeed * force;
 		}
-		// else we don't move and stretch the paddle
-		// to indicate we can't move
 		else
 		{
 			paddle1DirY = 0;
-			//paddle1.scale.z += (10 - paddle1.scale.z) * 0.2;
 		}
 	}	
-	// move right
 	else if (direction === "right")
 	{
-		// if paddle is not touching the side of table
-		// we move
 		if (paddle1.position.y > -fieldHeight * 0.45)
 		{
 			paddle1DirY = -paddleSpeed * force;
 		}
-		// else we don't move and stretch the paddle
-		// to indicate we can't move
 		else
 		{
 			paddle1DirY = 0;
-			//paddle1.scale.z += (10 - paddle1.scale.z) * 0.2;
 		}
 	}
-	// else don't move paddle
 	else
 	{
-		// stop the paddle
+		//Stop the paddle (no direction)
 		paddle1DirY = 0;
-	}
-	//paddle1.scale.y += (1 - paddle1.scale.y) * 0.2;	
-	//paddle1.scale.z += (1 - paddle1.scale.z) * 0.2;	
+	}	
 	paddle1.position.y += paddle1DirY;
 }
 
 // Handles camera and lighting logic
 function cameraMovement()
-{
-	// we can easily notice shadows if we dynamically move lights during the game
-//	spotLight.position.x = ball.position.x * 2;
-//	spotLight.position.y = ball.position.y * 2;
-	
+{	
 	// move to behind the player's paddle
 	camera.position.x = paddle1.position.x - 100;
 	camera.position.y += (paddle1.position.y - camera.position.y) * 0.05;
@@ -567,53 +532,36 @@ function cameraMovement()
 
 // Handles paddle collision logic
 function paddlePhysics()
-{
-	// PLAYER PADDLE LOGIC
-	
-	// if ball is aligned with paddle1 on x plane
-	// remember the position is the CENTER of the object
-	// we only check between the front and the middle of the paddle (one-way collision)
+{	
+	//If ball is aligned with paddle1 on x plane
 	if (ball.position.x <= paddle1.position.x + paddleWidth
-	&&  ball.position.x >= paddle1.position.x)
+	&&  ball.position.x >= paddle1.position.x - paddleWidth)
 	{
-		// and if ball is aligned with paddle1 on y plane
+		//And if ball is aligned with paddle1 on y plane
 		if (ball.position.y <= paddle1.position.y + paddleHeight/2
 		&&  ball.position.y >= paddle1.position.y - paddleHeight/2)
 		{
-			// and if ball is travelling towards player (-ve direction)
+			//And if ball is travelling towards player (-ve direction)
 			if (ballDirX < 0)
 			{
-				// stretch the paddle to indicate a hit
-				//paddle1.scale.y = 15;
-				// switch direction of ball travel to create bounce
+				//Bounce
 				ballDirX = -ballDirX;
 				//Impact ball angle when hitting it to make it possible to direct the ball
-
-				ballDirY -= paddle1DirY * 0.7;
+				ballDirY -= paddle1DirY * 0.4;
 			}
 		}
 	}
-	
-	// OPPONENT PADDLE LOGIC	
-	
-	// if ball is aligned with paddle2 on x plane
-	// remember the position is the CENTER of the object
-	// we only check between the front and the middle of the paddle (one-way collision)
+
+        //Same for opponent paddle
 	if (ball.position.x <= paddle2.position.x + paddleWidth
-	&&  ball.position.x >= paddle2.position.x)
+	&&  ball.position.x >= paddle2.position.x - paddleWidth)
 	{
-		// and if ball is aligned with paddle2 on y plane
 		if (ball.position.y <= paddle2.position.y + paddleHeight/2
 		&&  ball.position.y >= paddle2.position.y - paddleHeight/2)
 		{
-			// and if ball is travelling towards opponent (+ve direction)
 			if (ballDirX > 0)
 			{
-				// stretch the paddle to indicate a hit
-				//paddle2.scale.y = 15;	
-				// switch direction of ball travel to create bounce
 				ballDirX = -ballDirX;
-				//Impact ball angle when hitting it to make it possible to direct the ball
 				ballDirY -= paddle2DirY * 0.7;
 			}
 		}
@@ -626,12 +574,12 @@ function resetBall(loser)
 	ball.position.x = 0;
 	ball.position.y = 0;
 	
-	//If player lost the last point, we send the ball to opponent
+	//If player lost the last point, we send the ball towards the opponent
 	if (loser == 1)
 	{
 		ballDirX = -1;
 	}
-	//If opponent lost, we send ball to player
+	//If opponent lost, we send ball towards the player
 	else
 	{
 		ballDirX = 1;
@@ -642,37 +590,22 @@ function resetBall(loser)
 }
 
 var bounceTime = 0;
-// checks if either player or opponent has reached 7 points
+//Checks if either player or opponent has reached max points
 function matchScoreCheck()
 {
-	// if player has 7 points
+	//If player has max points
 	if (score1 >= maxScore)
 	{
-		// stop the ball
+		//Stop the ball
 		ballSpeed = 0;
-		// write to the banner
 		document.getElementById("scores").innerHTML = "Player wins!";		
 		document.getElementById("winnerBoard").innerHTML = "Refresh to play again";
-		// make paddle bounce up and down
-		bounceTime++;
-		paddle1.position.z = Math.sin(bounceTime * 0.1) * 10;
-		// enlarge and squish paddle to emulate joy
-		paddle1.scale.z = 2 + Math.abs(Math.sin(bounceTime * 0.1)) * 10;
-		paddle1.scale.y = 2 + Math.abs(Math.sin(bounceTime * 0.05)) * 10;
 	}
-	// else if opponent has 7 points
+	//If opponent has max points
 	else if (score2 >= maxScore)
 	{
-		// stop the ball
 		ballSpeed = 0;
-		// write to the banner
 		document.getElementById("scores").innerHTML = "CPU wins!";
 		document.getElementById("winnerBoard").innerHTML = "Refresh to play again";
-		// make paddle bounce up and down
-		bounceTime++;
-		paddle2.position.z = Math.sin(bounceTime * 0.1) * 10;
-		// enlarge and squish paddle to emulate joy
-		paddle2.scale.z = 2 + Math.abs(Math.sin(bounceTime * 0.1)) * 10;
-		paddle2.scale.y = 2 + Math.abs(Math.sin(bounceTime * 0.05)) * 10;
 	}
 }
