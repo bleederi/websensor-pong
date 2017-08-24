@@ -107,7 +107,7 @@ var paddleWidth, paddleHeight, paddleDepth, paddleQuality;
 var paddle1DirY = 0, paddle2DirY = 0, paddleSpeed = 8;
 
 // ball variables
-var ball, paddle1, paddle2;
+var ball;
 var ballDirX = 1, ballDirY = 1;
 
 const ballSpeedInitial = 2;     //We want to store the initial ball speed value for later use
@@ -270,23 +270,25 @@ function createScene()  //A modified version of the scene from http://buildnewga
 		paddleQuality,
 		paddleQuality);
 		
-	paddle1 = new THREE.Mesh(
+	let paddle1 = new THREE.Mesh(
                 paddleGeom,
 	        paddle1Material);
 
 	
-	paddle2 = new THREE.Mesh(
+	let paddle2 = new THREE.Mesh(
 		paddleGeom,
                 paddle2Material);
 
+        player1.paddle = paddle1;
+        player2.paddle = paddle2;
 	scene.add(paddle1);  
 	scene.add(paddle2);
 	
 	//Position the paddles
-	paddle1.position.x = -fieldWidth/2 + paddleWidth;
-	paddle2.position.x = fieldWidth/2 - paddleWidth;
-	paddle1.position.z = paddleDepth;
-	paddle2.position.z = paddleDepth;
+	player1.paddle.position.x = -fieldWidth/2 + paddleWidth;
+	player2.paddle.position.x = fieldWidth/2 - paddleWidth;
+	player1.paddle.position.z = paddleDepth;
+	player2.paddle.position.z = paddleDepth;
 		
         //Create pillars
 	for (var i = 0; i < 5; i++)
@@ -505,7 +507,7 @@ function playerPaddleMovement()
 	if (direction === "left")		
 	{
 		//If paddle is not touching the side of table then move
-		if (paddle1.position.y < fieldHeight * 0.45)
+		if (player1.paddle.position.y < fieldHeight * 0.45)
 		{
 			paddle1DirY = paddleSpeed * force;
 		}
@@ -516,7 +518,7 @@ function playerPaddleMovement()
 	}	
 	else if (direction === "right")
 	{
-		if (paddle1.position.y > -fieldHeight * 0.45)
+		if (player1.paddle.position.y > -fieldHeight * 0.45)
 		{
 			paddle1DirY = -paddleSpeed * force;
 		}
@@ -530,16 +532,16 @@ function playerPaddleMovement()
 		//Stop the paddle (no direction)
 		paddle1DirY = 0;
 	}	
-	paddle1.position.y += paddle1DirY;
+	player1.paddle.position.y += paddle1DirY;
 }
 
 // Handles camera and lighting logic
 function cameraMovement()
 {	
 	// move to behind the player's paddle
-	camera.position.x = paddle1.position.x - 100;
-	camera.position.y += (paddle1.position.y - camera.position.y) * 0.05;
-	camera.position.z = paddle1.position.z + 100 + 0.04 * (-ball.position.x + paddle1.position.x);
+	camera.position.x = player1.paddle.position.x - 100;
+	camera.position.y += (player1.paddle.position.y - camera.position.y) * 0.05;
+	camera.position.z = player1.paddle.position.z + 100 + 0.04 * (-ball.position.x + player1.paddle.position.x);
 	
 	// rotate to face towards the opponent
 	camera.rotation.x = -0.01 * (ball.position.y) * Math.PI/180;
@@ -551,12 +553,12 @@ function cameraMovement()
 function paddlePhysics()
 {	
 	//If ball is aligned with paddle1 on x plane
-	if (ball.position.x <= paddle1.position.x + paddleWidth
-	&&  ball.position.x >= paddle1.position.x - paddleWidth)
+	if (ball.position.x <= player1.paddle.position.x + paddleWidth
+	&&  ball.position.x >= player1.paddle.position.x - paddleWidth)
 	{
 		//And if ball is aligned with paddle1 on y plane
-		if (ball.position.y <= paddle1.position.y + paddleHeight/2
-		&&  ball.position.y >= paddle1.position.y - paddleHeight/2)
+		if (ball.position.y <= player1.paddle.position.y + paddleHeight/2
+		&&  ball.position.y >= player1.paddle.position.y - paddleHeight/2)
 		{
 			//And if ball is travelling towards player (-ve direction)
 			if (ballDirX < 0)
