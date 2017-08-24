@@ -413,24 +413,30 @@ function ballPhysics()
 	if (ball.position.x <= -fieldWidth/2)
 	{	
 		player2.increaseScore();
-		//Update scoreboard
-                context1.clearRect(0, 0, canvas1.width, canvas1.height);
-                context1.fillText(player1.score + '-' + player2.score, canvas1.width/2, canvas1.height/2);
-                texture1.needsUpdate = true;
-		resetBall(2);
+	        resetBall(2);
                 time = 0;       //Reset timer
-		matchScoreCheck();
+		//Update scoreboard only if no winner
+                if(winner === null)
+                {
+                        context1.clearRect(0, 0, canvas1.width, canvas1.height);
+                        context1.fillText(player1.score + '-' + player2.score, canvas1.width/2, canvas1.height/2);
+                        texture1.needsUpdate = true;
+		        matchScoreCheck();
+                }
 	}	
 	//Ball goes off the CPU's side - player scores
 	else if (ball.position.x >= fieldWidth/2)
-	{	
-		player1.increaseScore();
-                context1.clearRect(0, 0, canvas1.width, canvas1.height);
-                context1.fillText(player1.score + '-' + player2.score, canvas1.width/2, canvas1.height/2);
-                texture1.needsUpdate = true;
-		resetBall(1);
+	{
+	        player1.increaseScore();
+                resetBall(1);
                 time = 0;
-		matchScoreCheck();
+                if(winner === null)
+                {
+                        context1.clearRect(0, 0, canvas1.width, canvas1.height);
+                        context1.fillText(player1.score + '-' + player2.score, canvas1.width/2, canvas1.height/2);
+                        texture1.needsUpdate = true;
+		        matchScoreCheck();
+                }
 	}
 	
 	//Bounce off table border to keep the ball on the table
