@@ -72,10 +72,11 @@ class ShakeSensor extends LinearAccelerationSensor {
                 super();
                 this.shaking_ = false;
         }
-        this.onreading = () => {
-                this.shaking_ = Math.hypot(this.x, this.y, this.z) > 20;
-                console.log(Math.hypot(this.x, this.y, this.z));               
-                func();
+        set onreading(func) {
+                super.onreading = () => {
+                        this.shaking_ = Math.hypot(this.x, this.y, this.z) > 20;
+                        func();
+                }            
         }
 
         get shaking() {
@@ -107,6 +108,7 @@ const container = document.getElementById("gameCanvas");
 //Sensor initialization
 var oriSensor = new RelativeInclinationSensor();
 var accelerometer = new ShakeSensor();
+accelerometer.onreading = () => { console.log(Math.hypot(accelerometer.x, accelerometer.y, accelerometer.z)); };
 
 //Required for a THREE.js scene
 var renderer = new THREE.WebGLRenderer();
@@ -428,7 +430,7 @@ function render()
 	cameraMovement();
 	playerPaddleMovement();
 	opponentPaddleMovement();
-        checkRestart(); //Check if the player wants to restart the game                            
+        //checkRestart(); //Check if the player wants to restart the game                            
 }
 
 function ballPhysics()
