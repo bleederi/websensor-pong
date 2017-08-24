@@ -102,7 +102,7 @@ class Player {
 
 const container = document.getElementById("gameCanvas");
 var oriSensor = new RelativeInclinationSensor();
-var accelerometer = new ShakeSensor(60);
+var accelerometer = new ShakeSensor();
 
 //Required for a THREE.js scene
 var renderer = new THREE.WebGLRenderer();
