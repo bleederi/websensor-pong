@@ -66,18 +66,16 @@ class RelativeInclinationSensor {
         }
 }
 
-//This is an acceleration sensor that uses Accelerometer
+//This is a shake detection sensor that uses Accelerometer
 class ShakeSensor extends LinearAccelerationSensor {
         constructor() {
                 super();
                 this.shaking_ = false;
         }
-        set onreading(func) {
-            this.onreading = () => {
+        this.onreading = () => {
                 this.shaking_ = Math.hypot(this.x, this.y, this.z) > 20;
                 console.log(Math.hypot(this.x, this.y, this.z));               
                 func();
-            }
         }
 
         get shaking() {
@@ -106,6 +104,7 @@ class Player {
 }
 
 const container = document.getElementById("gameCanvas");
+//Sensor initialization
 var oriSensor = new RelativeInclinationSensor();
 var accelerometer = new ShakeSensor();
 
