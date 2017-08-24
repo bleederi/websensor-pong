@@ -677,9 +677,14 @@ function checkRestart()
         if(accelerometer.shaking)
         {
                 console.log("SHAKE");
+                //Save the paddles
+                let paddle1 = player1.paddle;
+                let paddle2 = player2.paddle;
                 //Initialize players, variables and scene again
                 player1 = new Player();
                 player2 = new Player();
+                player1.paddle = paddle1;
+                player2.paddle = paddle2;
                 ballSpeed = ballSpeedInitial;
                 winner = null;
 	        ball.position.x = 0;
