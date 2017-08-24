@@ -447,9 +447,6 @@ function ballPhysics()
                 if(winner === null)
                 {
                         updateScoreboard("Bold 40px Arial", player1.score + '-' + player2.score);
-                        /*context1.clearRect(0, 0, canvas1.width, canvas1.height);
-                        context1.fillText(player1.score + '-' + player2.score, canvas1.width/2, canvas1.height/2);
-                        texture1.needsUpdate = true;*/
 		        matchScoreCheck();
                 }
 	}	
@@ -462,9 +459,6 @@ function ballPhysics()
                 if(winner === null)
                 {
                         updateScoreboard("Bold 40px Arial", player1.score + '-' + player2.score);
-                        /*context1.clearRect(0, 0, canvas1.width, canvas1.height);
-                        context1.fillText(player1.score + '-' + player2.score, canvas1.width/2, canvas1.height/2);
-                        texture1.needsUpdate = true;*/
 		        matchScoreCheck();
                 }
 	}
@@ -658,10 +652,6 @@ function matchScoreCheck()
 		//Stop the ball
 		ballSpeed = 0;
                 updateScoreboard("Bold 20px Arial", "You win, congratulations!");
-                /*context1.clearRect(0, 0, canvas1.width, canvas1.height);
-	        context1.font = "Bold 20px Arial";
-                context1.fillText("You win, congratulations!", canvas1.width/2, canvas1.height/2);
-                texture1.needsUpdate = true;*/
 	}
 	//If opponent has max points
 	else if (player2.score >= maxScore && winner === null)
@@ -669,10 +659,6 @@ function matchScoreCheck()
                 winner = player2;
 		ballSpeed = 0;
                 updateScoreboard("Bold 20px Arial", "Opponent wins!");
-                /*context1.clearRect(0, 0, canvas1.width, canvas1.height);
-	        context1.font = "Bold 20px Arial";
-                context1.fillText("Opponent wins!", canvas1.width/2, canvas1.height/2);
-                texture1.needsUpdate = true;*/
 	}
 }
 
