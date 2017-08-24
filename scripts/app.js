@@ -384,7 +384,7 @@ function render()
 function ballPhysics()
 {
         ballSpeed = ballSpeedInitial + (ballSpeedInitial * time/10000); //Increase ball speed with time
-        ballSpeed = Math.max(ballSpeedInitial, Math.min(ballSpeed, 4))     //Clamp the speed
+        ballSpeed = Math.max(ballSpeedInitial, Math.min(ballSpeed, 6))     //Clamp the speed
 	//Ball goes off the player's side - opponent scores
 	if (ball.position.x <= -fieldWidth/2)
 	{	
@@ -424,7 +424,7 @@ function ballPhysics()
 	ball.position.y += ballDirY * ballSpeed;
 	
 	//Limit ball's y-speed to make it easier (ball does not go too fast in left-right direction)
-        let maxYSpeed = Math.max(2 * ballSpeedInitial, ballSpeed * 1.2);
+        let maxYSpeed = Math.min(1.2 * ballSpeedInitial, ballSpeed);
 	if (ballDirY > maxYSpeed)
 	{
 		ballDirY = maxYSpeed;
