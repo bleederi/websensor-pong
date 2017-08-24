@@ -71,7 +71,7 @@ class ShakeSensor extends Accelerometer {
         this.shaking_ = false;
         set onreading(func) {
             super.onreading = () => {
-                this.shaking_ = Math.hypot(super.x, super.y, super.z) < 20;
+                this.shaking_ = Math.hypot(super.x, super.y, super.z) > 20;                
                 func();
             }
         }
