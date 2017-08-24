@@ -68,7 +68,6 @@ class RelativeInclinationSensor {
 
 //This is an acceleration sensor that uses Accelerometer
 class ShakeSensor extends Accelerometer{
-        constructor(frequency) {
         set onreading(func) {
             super.onreading = () => {
                 this.shaking_ = Math.hypot(super.x, super.y, super.z) < 20;
