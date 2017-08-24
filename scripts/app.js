@@ -119,6 +119,8 @@ var timerVar = null;
 
 var player1 = new Player();
 var player2 = new Player();
+
+var winner = null;
 //Scores
 var score1 = 0; //Player's score
 var score2 = 0; //Opponent's score
@@ -607,11 +609,11 @@ function resetBall(loser)
 }
 
 var bounceTime = 0;
-//Checks if either player or opponent has reached max points
+//Checks if either player or opponent has reached max points TODO: Make sure there can only be one winner, 
 function matchScoreCheck()
 {
 	//If player has max points
-	if (score1 >= maxScore)
+	if (score1 >= maxScore && winner === null)
 	{
                 winner = player1;
 		//Stop the ball
@@ -622,7 +624,7 @@ function matchScoreCheck()
                 texture1.needsUpdate = true;
 	}
 	//If opponent has max points
-	else if (score2 >= maxScore)
+	else if (score2 >= maxScore && winner === null)
 	{
                 winner = player2;
 		ballSpeed = 0;
