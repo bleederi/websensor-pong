@@ -457,7 +457,7 @@ function ballPhysics()
 	if (ball.position.x <= -fieldWidth/2)
 	{	
 		player2.increaseScore();
-	        resetBall(2);
+	        resetBall(player2);
                 time = 0;       //Reset timer
 		//Update scoreboard only if no winner
                 if(winner === null)
@@ -472,7 +472,7 @@ function ballPhysics()
 	else if (ball.position.x >= fieldWidth/2)
 	{
 	        player1.increaseScore();
-                resetBall(1);
+                resetBall(player1);
                 time = 0;
                 if(winner === null)
                 {
@@ -647,12 +647,12 @@ function resetBall(loser)
 	ball.position.y = 0;
 	
 	//If player lost the last point, we send the ball towards the opponent
-	if (loser == 1)
+	if (loser == player1)
 	{
 		ballDirX = -1;
 	}
 	//If opponent lost, we send ball towards the player
-	else
+	else if (loser === player2)
 	{
 		ballDirX = 1;
 	}
