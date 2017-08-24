@@ -707,5 +707,6 @@ function checkRestart()
 	        player1.paddle.position.z = paddleDepth;
 	        player2.paddle.position.z = paddleDepth;
                 time = 0;
+                updateScoreboard("Bold 20px Arial","First to " + maxScore + " wins");
         }
 }
