@@ -74,7 +74,7 @@ class ShakeSensor extends LinearAccelerationSensor {
         }
         set onreading(func) {
             this.onreading = () => {
-                this.shaking_ = Math.hypot(super.x, super.y, super.z) > 20;                
+                this.shaking_ = Math.hypot(this.x, this.y, this.z) > 20;                
                 func();
             }
         }
