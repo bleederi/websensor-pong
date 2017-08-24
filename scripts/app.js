@@ -282,7 +282,7 @@ function createScene()  //A modified version of the scene from http://buildnewga
 	
 	ball.position.x = 0;
 	ball.position.y = 0;
-	ball.position.z = radius;
+	ball.position.z = ball.geometry.radius;
 	ball.receiveShadow = true;
         ball.castShadow = true;
 	
