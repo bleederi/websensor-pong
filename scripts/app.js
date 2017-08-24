@@ -66,6 +66,23 @@ class RelativeInclinationSensor {
         }
 }
 
+//Player class
+class Player {
+        constructor() {
+        this.score_ = 0;
+        this.paddle_ = null;
+        }
+        increaseScore() {
+                this.score_ += 1;
+        }
+        get score() {
+                return this.score_;
+        }
+        get paddle() {
+                return this.paddle_;
+        }
+}
+
 const container = document.getElementById("gameCanvas");
 var oriSensor = new RelativeInclinationSensor();
 
@@ -100,6 +117,8 @@ var ballSpeed = ballSpeedInitial;
 var time=0;
 var timerVar = null;
 
+var player1 = new Player();
+var player2 = new Player();
 //Scores
 var score1 = 0; //Player's score
 var score2 = 0; //Opponent's score
@@ -594,6 +613,7 @@ function matchScoreCheck()
 	//If player has max points
 	if (score1 >= maxScore)
 	{
+                winner = player1;
 		//Stop the ball
 		ballSpeed = 0;
                 context1.clearRect(0, 0, canvas1.width, canvas1.height);
@@ -604,6 +624,7 @@ function matchScoreCheck()
 	//If opponent has max points
 	else if (score2 >= maxScore)
 	{
+                winner = player2;
 		ballSpeed = 0;
                 context1.clearRect(0, 0, canvas1.width, canvas1.height);
 	        context1.font = "Bold 20px Arial";
