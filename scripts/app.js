@@ -696,6 +696,7 @@ function checkRestart()
         }
         let accelMag = Math.sqrt(accelerometer.x ** 2, accelerometer.y ** 2, accelerometer.z ** 2);     //Magnitude of acceleration
         let diff = accelMag - prevAccelMag;
+        console.log(diff);
         if(diff > (120/sensorFreq))  //with lower sensor frequencies the diff will be bigger
         {
                 shakingvar = shakingvar + 1;
