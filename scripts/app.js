@@ -132,6 +132,7 @@ var paddle1DirY = 0, paddle2DirY = 0, paddleSpeed = 8;
 
 // ball variables
 var ball;
+var radius = 5;
 var ballDirX = 1, ballDirY = 1;
 
 const ballSpeedInitial = 2;     //We want to store the initial ball speed value for later use
@@ -275,7 +276,7 @@ function createScene()  //A modified version of the scene from http://buildnewga
 		{
 		  color: "white"
 		});
-        let radius = 5;
+        radius = 5;
 	ball = new THREE.Mesh(new THREE.SphereGeometry(radius, 6, 6), sphereMaterial);
 
 	scene.add(ball);
@@ -689,7 +690,7 @@ function checkRestart()
                 winner = null;
 	        ball.position.x = 0;
 	        ball.position.y = 0;
-	        ball.position.z = ball.geometry.radius;
+	        ball.position.z = radius;
 	        player1.paddle.position.x = -fieldWidth/2 + paddleWidth;
 	        player2.paddle.position.x = fieldWidth/2 - paddleWidth;
 	        player1.paddle.position.z = paddleDepth;
