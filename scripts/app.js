@@ -684,7 +684,7 @@ function checkRestart()
                 winner = null;
 	        ball.position.x = 0;
 	        ball.position.y = 0;
-	        ball.position.z = radius;
+	        ball.position.z = ball.geometry.radius;
 	        player1.paddle.position.x = -fieldWidth/2 + paddleWidth;
 	        player2.paddle.position.x = fieldWidth/2 - paddleWidth;
 	        player1.paddle.position.z = paddleDepth;
