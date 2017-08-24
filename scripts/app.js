@@ -677,10 +677,18 @@ function checkRestart()
         if(accelerometer.shaking)
         {
                 console.log("SHAKE");
-                //Initialize players and scene again
+                //Initialize players, variables and scene again
                 player1 = new Player();
                 player2 = new Player();
-                createScene();
+                ballSpeed = ballSpeedInitial;
+                winner = null;
+	        ball.position.x = 0;
+	        ball.position.y = 0;
+	        ball.position.z = radius;
+	        player1.paddle.position.x = -fieldWidth/2 + paddleWidth;
+	        player2.paddle.position.x = fieldWidth/2 - paddleWidth;
+	        player1.paddle.position.z = paddleDepth;
+	        player2.paddle.position.z = paddleDepth;
                 time = 0;
         }
 }
