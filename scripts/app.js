@@ -108,7 +108,7 @@ const container = document.getElementById("gameCanvas");
 //Sensor initialization
 var oriSensor = new RelativeInclinationSensor();
 var accelerometer = new ShakeSensor();
-accelerometer.onreading = () => { console.log(Math.hypot(accelerometer.x, accelerometer.y, accelerometer.z)); };
+accelerometer.onreading = () => { checkRestart(); };
 
 //Required for a THREE.js scene
 var renderer = new THREE.WebGLRenderer();
