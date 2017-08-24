@@ -463,12 +463,12 @@ function ballPhysics()
 function opponentPaddleMovement()
 {
 	// Lerp towards the ball on the y plane
-	paddle2DirY = (ball.position.y - paddle2.position.y) * difficulty;
+	paddle2DirY = (ball.position.y - player2.paddle.position.y) * difficulty;
 	
 	// in case the Lerp function produces a value above max paddle speed, we clamp it
 	if (Math.abs(paddle2DirY) <= paddleSpeed)
 	{	
-		paddle2.position.y += paddle2DirY;
+		player2.paddle.position.y += paddle2DirY;
 	}
 	// if the lerp value is too high, we have to limit speed to paddleSpeed
 	else
@@ -476,12 +476,12 @@ function opponentPaddleMovement()
 		// if paddle is lerping in +ve direction
 		if (paddle2DirY > paddleSpeed)
 		{
-			paddle2.position.y += paddleSpeed;
+			player2.paddle.position.y += paddleSpeed;
 		}
 		// if paddle is lerping in -ve direction
 		else if (paddle2DirY < -paddleSpeed)
 		{
-			paddle2.position.y -= paddleSpeed;
+			player2.paddle.position.y -= paddleSpeed;
 		}
 	}
 }
@@ -575,11 +575,11 @@ function paddlePhysics()
 	}
 
         //Same for opponent paddle
-	if (ball.position.x <= paddle2.position.x + paddleWidth
-	&&  ball.position.x >= paddle2.position.x - paddleWidth)
+	if (ball.position.x <= player2.paddle.position.x + paddleWidth
+	&&  ball.position.x >= player2.paddle.position.x - paddleWidth)
 	{
-		if (ball.position.y <= paddle2.position.y + paddleHeight/2
-		&&  ball.position.y >= paddle2.position.y - paddleHeight/2)
+		if (ball.position.y <= player2.paddle.position.y + paddleHeight/2
+		&&  ball.position.y >= player2.paddle.position.y - paddleHeight/2)
 		{
 			if (ballDirX > 0)
 			{
