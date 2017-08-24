@@ -67,7 +67,7 @@ class RelativeInclinationSensor {
 }
 
 //This is an acceleration sensor that uses Accelerometer
-class ShakeSensor extends Accelerometer {
+class ShakeSensor extends LinearAccelerationSensor {
         constructor() {
                 super();
                 this.shaking_ = false;
