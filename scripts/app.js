@@ -68,8 +68,8 @@ class RelativeInclinationSensor {
 
 //This is an acceleration sensor that uses Accelerometer
 class AccelerationSensor {
-        constructor() {
-        this.sensor_ = new Accelerometer({ frequency: 60 });
+        constructor(frequency) {
+        this.sensor_ = new Accelerometer({ frequency });
         this.x_ = 0;
         this.y_ = 0;
         this.z_ = 0;
@@ -124,7 +124,7 @@ class Player {
 
 const container = document.getElementById("gameCanvas");
 var oriSensor = new RelativeInclinationSensor();
-var accelerometer = new AccelerationSensor();
+var accelerometer = new AccelerationSensor(60);
 
 //Required for a THREE.js scene
 var renderer = new THREE.WebGLRenderer();
@@ -662,7 +662,7 @@ function resetBall(loser)
 }
 
 var bounceTime = 0;
-//Checks if either player or opponent has reached max points TODO: Make sure there can only be one winner, 
+//Checks if either player or opponent has reached max points
 function matchScoreCheck()
 {
 	//If player has max points
