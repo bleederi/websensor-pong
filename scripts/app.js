@@ -67,38 +67,17 @@ class RelativeInclinationSensor {
 }
 
 //This is an acceleration sensor that uses Accelerometer
-class AccelerationSensor {
+class ShakeSensor extends Accelerometer{
         constructor(frequency) {
-        this.sensor_ = new Accelerometer({ frequency });
-        this.x_ = 0;
-        this.y_ = 0;
-        this.z_ = 0;
-        this.sensor_.onreading = () => {
-                this.x_ = this.sensor_.x;
-                this.y_ = this.sensor_.y;
-                this.z_ = this.sensor_.z;
-                if (this.onreading_) this.onreading_();
-        };
+        set onreading(func) {
+            super.onreading = () => {
+                this.shaking_ = Math.hypot(super.x, super.y, super.z) < 20;
+                func();
+            }
         }
-        start() { this.sensor_.start(); }
-        stop() { this.sensor_.stop(); }
-        get x() {
-                return this.x_;
-        }
-        get y() {
-                return this.y_;
-        } 
-        get z() {
-                return this.z_;
-        }
-        set onactivate(func) {
-                this.sensor_.onactivate_ = func;
-        }
-        set onerror(err) {
-                this.sensor_.onerror_ = err;
-        }
-        set onreading (func) {
-                this.onreading_ = func;  
+
+        get shaking {
+            return this.shaking_;
         }
 }
 
@@ -124,7 +103,7 @@ class Player {
 
 const container = document.getElementById("gameCanvas");
 var oriSensor = new RelativeInclinationSensor();
-var accelerometer = new AccelerationSensor(60);
+var accelerometer = new ShakeSensor(60);
 
 //Required for a THREE.js scene
 var renderer = new THREE.WebGLRenderer();
@@ -690,28 +669,8 @@ function matchScoreCheck()
 
 function checkRestart()
 {
-        if(prevAccelMag === null)
-        {
-                prevAccelMag = Math.sqrt(accelerometer.x ** 2, accelerometer.y ** 2, accelerometer.z ** 2);
-        }
-        let accelMag = Math.sqrt(accelerometer.x ** 2, accelerometer.y ** 2, accelerometer.z ** 2);     //Magnitude of acceleration
-        let diff = accelMag - prevAccelMag;
-        console.log(diff);
-        if(diff > (120/sensorFreq))  //with lower sensor frequencies the diff will be bigger
-        {
-                shakingvar = shakingvar + 20;
-        }
-        else
-        {
-                if(shakingvar > 0)
-                {
-                shakingvar = shakingvar - 1;
-                }
-        }
-        if(shakingvar >= 100)    //shake event
+        if(accelerometer.shaking)
         {
                 console.log("SHAKE");
-                shakingvar = 0;
         }
-        prevAccelMag = accelMag;
 }
