@@ -75,7 +75,7 @@ class ShakeSensor extends Accelerometer{
             }
         }
 
-        get shaking {
+        get shaking() {
             return this.shaking_;
         }
 }
