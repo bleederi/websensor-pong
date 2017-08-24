@@ -66,7 +66,7 @@ class RelativeInclinationSensor {
         }
 }
 
-//Player class
+//Player class, represents a player
 class Player {
         constructor() {
         this.score_ = 0;
@@ -121,9 +121,7 @@ var player1 = new Player();
 var player2 = new Player();
 
 var winner = null;
-//Scores
-var score1 = 0; //Player's score
-var score2 = 0; //Opponent's score
+
 const maxScore = 7;
 
 //Opponent difficulty (between 0 and 1)
@@ -409,10 +407,10 @@ function ballPhysics()
 	//Ball goes off the player's side - opponent scores
 	if (ball.position.x <= -fieldWidth/2)
 	{	
-		score2++;
+		player2.increaseScore();
 		//Update scoreboard
                 context1.clearRect(0, 0, canvas1.width, canvas1.height);
-                context1.fillText(score1 + '-' + score2, canvas1.width/2, canvas1.height/2);
+                context1.fillText(player1.score + '-' + player2.score, canvas1.width/2, canvas1.height/2);
                 texture1.needsUpdate = true;
 		resetBall(2);
                 time = 0;       //Reset timer
@@ -421,9 +419,9 @@ function ballPhysics()
 	//Ball goes off the CPU's side - player scores
 	else if (ball.position.x >= fieldWidth/2)
 	{	
-		score1++;
+		player1.increaseScore();
                 context1.clearRect(0, 0, canvas1.width, canvas1.height);
-                context1.fillText(score1 + '-' + score2, canvas1.width/2, canvas1.height/2);
+                context1.fillText(player1.score + '-' + player2.score, canvas1.width/2, canvas1.height/2);
                 texture1.needsUpdate = true;
 		resetBall(1);
                 time = 0;
@@ -613,7 +611,7 @@ var bounceTime = 0;
 function matchScoreCheck()
 {
 	//If player has max points
-	if (score1 >= maxScore && winner === null)
+	if (player1.score >= maxScore && winner === null)
 	{
                 winner = player1;
 		//Stop the ball
@@ -624,7 +622,7 @@ function matchScoreCheck()
                 texture1.needsUpdate = true;
 	}
 	//If opponent has max points
-	else if (score2 >= maxScore && winner === null)
+	else if (player2.score >= maxScore && winner === null)
 	{
                 winner = player2;
 		ballSpeed = 0;
