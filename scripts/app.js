@@ -677,5 +677,10 @@ function checkRestart()
         if(accelerometer.shaking)
         {
                 console.log("SHAKE");
+                //Initialize players and scene again
+                player1 = new Player();
+                player2 = new Player();
+                createScene();
+                time = 0;
         }
 }
