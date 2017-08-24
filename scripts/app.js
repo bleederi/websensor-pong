@@ -276,7 +276,6 @@ function createScene()  //A modified version of the scene from http://buildnewga
 		{
 		  color: "white"
 		});
-        radius = 5;
 	ball = new THREE.Mesh(new THREE.SphereGeometry(radius, 6, 6), sphereMaterial);
 
 	scene.add(ball);
