@@ -347,7 +347,6 @@ function createScene()  //A modified version of the scene from http://buildnewga
 	context1.font = "Bold 20px Arial";
 	context1.fillText("First to " + maxScore + " wins", canvas1.width/2, canvas1.height/2);
 	context1.font = "Bold 40px Arial";
-        //context1.fillText(score1 + '-' + score2, canvas1.width/2, canvas1.height/2);
     
 	//Canvas contents will be used for a texture
 	texture1 = new THREE.Texture(canvas1);
@@ -385,6 +384,7 @@ function render()
 function ballPhysics()
 {
         ballSpeed = ballSpeedInitial + (ballSpeedInitial * time/10000); //Increase ball speed with time
+        ballSpeed = Math.max(ballSpeedInitial, Math.min(ballSpeed, 4))     //Clamp the speed
 	//Ball goes off the player's side - opponent scores
 	if (ball.position.x <= -fieldWidth/2)
 	{	
