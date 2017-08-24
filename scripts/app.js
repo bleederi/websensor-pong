@@ -699,7 +699,7 @@ function checkRestart()
         console.log(diff);
         if(diff > (120/sensorFreq))  //with lower sensor frequencies the diff will be bigger
         {
-                shakingvar = shakingvar + 1;
+                shakingvar = shakingvar + 20;
         }
         else
         {
