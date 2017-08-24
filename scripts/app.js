@@ -75,6 +75,9 @@ class Player {
         increaseScore() {
                 this.score_ += 1;
         }
+        set paddle(paddle) {
+                this.paddle_ = paddle;
+        }
         get score() {
                 return this.score_;
         }
