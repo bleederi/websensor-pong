@@ -66,6 +66,42 @@ class RelativeInclinationSensor {
         }
 }
 
+//This is an acceleration sensor that uses Accelerometer
+class AccelerationSensor {
+        constructor() {
+        this.sensor_ = new Accelerometer({ frequency: 60 });
+        this.x_ = 0;
+        this.y_ = 0;
+        this.z_ = 0;
+        this.sensor_.onreading = () => {
+                this.x_ = this.sensor_.x;
+                this.y_ = this.sensor_.y;
+                this.z_ = this.sensor_.z;
+                if (this.onreading_) this.onreading_();
+        };
+        }
+        start() { this.sensor_.start(); }
+        stop() { this.sensor_.stop(); }
+        get x() {
+                return this.x_;
+        }
+        get y() {
+                return this.y_;
+        } 
+        get z() {
+                return this.z_;
+        }
+        set onactivate(func) {
+                this.sensor_.onactivate_ = func;
+        }
+        set onerror(err) {
+                this.sensor_.onerror_ = err;
+        }
+        set onreading (func) {
+                this.onreading_ = func;  
+        }
+}
+
 //Player class, represents a player
 class Player {
         constructor() {
@@ -88,6 +124,7 @@ class Player {
 
 const container = document.getElementById("gameCanvas");
 var oriSensor = new RelativeInclinationSensor();
+var accelerometer = new AccelerationSensor();
 
 //Required for a THREE.js scene
 var renderer = new THREE.WebGLRenderer();
@@ -135,6 +172,11 @@ var canvas1 = null;
 var context1 = null;
 var texture1 = null;
 
+//Shaking counter
+var shakingvar = 0;
+var prevAccelMag = null;
+const sensorFreq = 60;
+
 //Service worker registration
 if ('serviceWorker' in navigator) {
         window.addEventListener('load', function() {
@@ -161,6 +203,7 @@ function init()
 	container.appendChild(renderer.domElement);
         //Sensor initialization
         oriSensor.start();
+        accelerometer.start();
 
         window.addEventListener( 'resize', onWindowResize, false );     //On window resize, also resize canvas so it fills the screen
 
@@ -403,6 +446,7 @@ function render()
 	cameraMovement();
 	playerPaddleMovement();
 	opponentPaddleMovement();
+        checkRestart(); //Check if the player wants to restart the game                            
 }
 
 function ballPhysics()
@@ -642,4 +686,31 @@ function matchScoreCheck()
                 context1.fillText("Opponent wins!", canvas1.width/2, canvas1.height/2);
                 texture1.needsUpdate = true;
 	}
+}
+
+function checkRestart()
+{
+        if(prevAccelMag === null)
+        {
+                prevAccelMag = Math.sqrt(accelerometer.x ** 2, accelerometer.y ** 2, accelerometer.z ** 2);
+        }
+        let accelMag = Math.sqrt(accelerometer.x ** 2, accelerometer.y ** 2, accelerometer.z ** 2);     //Magnitude of acceleration
+        let diff = accel - prevAccelMag;
+        if(diff > (120/sensorFreq))  //with lower sensor frequencies the diff will be bigger
+        {
+                shakingvar = shakingvar + 1;
+        }
+        else
+        {
+                if(shakingvar > 0)
+                {
+                shakingvar = shakingvar - 1;
+                }
+        }
+        if(shakingvar >= 100)    //shake event
+        {
+                console.log("SHAKE");
+                shakingvar = 0;
+        }
+        prevAccelMag = accelMag;
 }
