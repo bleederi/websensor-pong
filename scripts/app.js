@@ -570,7 +570,7 @@ function playerPaddleMovement() {
 			paddle1DirY = 0;
 		}
 	}	
-	else if (direction === "right") {
+	else if (tiltSensor.direction === "right") {
 		if (player1.paddle.position.y > -fieldHeight * 0.45)
 		{
 			paddle1DirY = -paddleSpeed * tiltSensor.angle;
