@@ -57,15 +57,6 @@ if('RelativeOrientationSensor' in window) {
             get z() {
                     return this.z_;
             }
-            set onactivate(func) {
-                    this.sensor_.onactivate_ = func;
-            }
-            set onerror(err) {
-                    this.sensor_.onerror_ = err;
-            }
-            set onreading (func) {
-                    this.onreading_ = func;  
-            }
     }
 } else {
     // Fake interface
