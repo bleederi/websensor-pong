@@ -22,10 +22,12 @@
 
 'use strict';
 
-    // This is an inclination sensor that uses RelativeOrientationSensor
-    // and converts the quaternion to Euler angles
+// If generic sensors are enabled and RelativeOrientationSensor is defined, create class normally
+// Otherwise create a fake class
 if('RelativeOrientationSensor' in window) {
-    window.RelativeInclinationSensor = class RelativeInclinationSensor extends RelativeOrientationSensor {
+    // This is a tilt sensor that uses RelativeOrientationSensor
+    // and converts the quaternion to Euler angles
+    window.TiltSensor = class RelativeInclinationSensor extends RelativeOrientationSensor {
         constructor(options) {
             super(options);
             this.yaw_ = 0;
@@ -72,6 +74,7 @@ if('RelativeOrientationSensor' in window) {
         }
     }
 } else {
+
     // Fake interface
     window.RelativeInclinationSensor = class RelativeInclinationSensor {
         constructor(options) {
@@ -92,26 +95,46 @@ if('RelativeOrientationSensor' in window) {
             return 0;
         }
     }
+
     // Inform the user that generic sensors are not enabled
     document.getElementById("no-sensors").style.display = "block";
 }
 
-//This is a shake detection sensor that uses Accelerometer
-class ShakeSensor extends LinearAccelerationSensor {
-        constructor() {
-                super();
-                this.shaking_ = false;
-        }
-        set onreading(func) {
-                super.onreading = () => {
-                        this.shaking_ = Math.hypot(this.x, this.y, this.z) > 20;
-                        func();
-                }            
+// This is a shake detection sensor that uses LinearAccelerationSensor
+if('LinearAccelerationSensor' in window) {
+    window.ShakeSensor = class ShakeSensor extends LinearAccelerationSensor {
+            constructor() {
+                    super();
+                    this.shaking_ = false;
+            }
+            set onreading(func) {
+                    super.onreading = () => {
+                            this.shaking_ = Math.hypot(this.x, this.y, this.z) > 20;
+                            func();
+                    }            
+            }
+
+            get shaking() {
+                return this.shaking_;
+            }
+    }
+} else {
+
+    // Fake interface
+    window.ShakeSensor = class ShakeSensor {
+        constructor(options) {
+            this.start = function() {};
         }
 
+        set onreading(func) {}
+
         get shaking() {
-            return this.shaking_;
+            return false;
         }
+    }
+
+    // Inform the user that generic sensors are not enabled
+    document.getElementById("no-sensors").style.display = "block";
 }
 
 //Player class, represents a player
@@ -138,7 +161,7 @@ class Player {
 const FOV = 50, ASPECT = 640 / 360, NEAR = 0.1, FAR = 10000;
 
 // Required for a THREE.js scene
-var camera, scene, renderer, oriSensor, accelerometer;
+var camera, scene, renderer, tiltSensor, shakeSensor;
 
 // Field variables
 const fieldWidth = 400, fieldHeight = 200;
@@ -189,9 +212,9 @@ function init() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio( window.devicePixelRatio );
 	scene.add(camera);
-    oriSensor = new RelativeInclinationSensor( {frequency: 60} );
-    accelerometer = new ShakeSensor( {frequency: 60} );
-    accelerometer.onreading = () => { checkRestart(); };
+    tiltSensor = new TiltSensor( {frequency: 60} );
+    shakeSensor = new ShakeSensor( {frequency: 60} );
+    shakeSensor.onreading = () => { checkRestart(); };
 	
 	// Set up all the objects in the scene (table, ball, paddles)	
 	createScene();
@@ -199,8 +222,8 @@ function init() {
 	container.appendChild(renderer.domElement);
 
     // Sensor initialization
-    oriSensor.start();
-    accelerometer.start();
+    tiltSensor.start();
+    shakeSensor.start();
 
     // On window resize, also resize canvas so it fills the screen
     window.addEventListener('resize', () => {
@@ -526,16 +549,16 @@ function playerPaddleMovement() {
         switch(screen.orientation.angle) {
                 default:
                 case 0:
-                        oriSensor.pitch < 0 ? direction = "left" : direction = "right";
-                        force = Math.abs(oriSensor.pitch);
+                        tiltSensor.pitch < 0 ? direction = "left" : direction = "right";
+                        force = Math.abs(tiltSensor.pitch);
                 break;
                 case 90:
-                        oriSensor.yaw < 0 ? direction = "left" : direction = "right";
-                        force = Math.abs(oriSensor.yaw);
+                        tiltSensor.yaw < 0 ? direction = "left" : direction = "right";
+                        force = Math.abs(tiltSensor.yaw);
                 break;
                 case 270:
-                        oriSensor.yaw < 0 ? direction = "right" : direction = "left";
-                        force = Math.abs(oriSensor.yaw);
+                        tiltSensor.yaw < 0 ? direction = "right" : direction = "left";
+                        force = Math.abs(tiltSensor.yaw);
                 break;
                 }
 	if (direction === "left")		
@@ -671,7 +694,7 @@ function updateScoreboard(font, text) {
 }
 
 function checkRestart() {
-    if(accelerometer.shaking) {
+    if(shakeSensor.shaking) {
         // Save the paddles
         let paddle1 = player1.paddle;
         let paddle2 = player2.paddle;
