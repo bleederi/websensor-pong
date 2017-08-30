@@ -24,8 +24,9 @@
 
 //This is an inclination sensor that uses RelativeOrientationSensor and converts the quaternion to Euler angles
 if('RelativeOrientationSensor' in window) {
-    window.RelativeInclinationSensor = class RelativeInclinationSensor {
-            constructor() {
+    window.RelativeInclinationSensor = class RelativeInclinationSensor extends RelativeOrientationSensor {
+            constructor(options) {
+            super(options);
             this.sensor_ = new RelativeOrientationSensor({ frequency: 60 });
             this.x_ = 0;
             this.y_ = 0;
