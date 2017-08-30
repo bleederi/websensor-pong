@@ -107,13 +107,8 @@ class Player {
 // Camera constants
 const FOV = 50, ASPECT = 640 / 360, NEAR = 0.1, FAR = 10000;
 
-//Sensor initialization
-var oriSensor = new RelativeInclinationSensor();
-var accelerometer = new ShakeSensor();
-accelerometer.onreading = () => { checkRestart(); };
-
 // Required for a THREE.js scene
-var camera, scene, renderer;
+var camera, scene, renderer, oriSensor, accelerometer;
 
 var pointLight, spotLight;
 
@@ -178,6 +173,9 @@ function init() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio( window.devicePixelRatio );
 	scene.add(camera);
+    oriSensor = new RelativeInclinationSensor( {frequency: 60} );
+    accelerometer = new ShakeSensor( {frequency: 60} );
+    accelerometer.onreading = () => { checkRestart(); };
 	
 	//Set up all the objects in the scene (table, ball, paddles)	
 	createScene();
