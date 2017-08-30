@@ -190,7 +190,7 @@ function init() {
     renderer.setPixelRatio( window.devicePixelRatio );
 	scene.add(camera);
     oriSensor = new RelativeInclinationSensor( {frequency: 60} );
-    //oriSensor.onreading = asd;
+    oriSensor.onreading = asd;
     accelerometer = new ShakeSensor( {frequency: 60} );
     accelerometer.onreading = () => { checkRestart(); };
 	
