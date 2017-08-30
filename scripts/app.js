@@ -182,19 +182,21 @@ function init() {
 
 	container.appendChild(renderer.domElement);
 
-    //Sensor initialization
+    // Sensor initialization
     oriSensor.start();
     accelerometer.start();
 
-    window.addEventListener( 'resize', onWindowResize, false );     //On window resize, also resize canvas so it fills the screen
-
-    function onWindowResize() {
-            camera.updateProjectionMatrix();
-            renderer.setSize( window.innerWidth , window.innerHeight);
-    }
+    // On window resize, also resize canvas so it fills the screen
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    }, false);
 	
 	render();
-        timerVar=setInterval(function(){time = time + 10;},10);  //Timer in ms, lowest possible value is 10, accurate enough though
+
+    // Timer in ms, lowest possible value is 10, accurate enough though
+    timerVar=setInterval(function(){time = time + 10;},10);
 }
 
 function createScene()  //A modified version of the scene from http://buildnewgames.com/webgl-threejs/
