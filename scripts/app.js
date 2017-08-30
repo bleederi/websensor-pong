@@ -111,8 +111,9 @@ if('RelativeOrientationSensor' in window) {
     document.getElementById("no-sensors").style.display = "block";
 }
 
-// This is a shake detection sensor that uses LinearAccelerationSensor
 if('LinearAccelerationSensor' in window) {
+
+    // This is a shake detection sensor that uses LinearAccelerationSensor
     window.ShakeSensor = class ShakeSensor extends LinearAccelerationSensor {
             constructor() {
                     super();
@@ -151,20 +152,20 @@ if('LinearAccelerationSensor' in window) {
 //Player class, represents a player
 class Player {
         constructor() {
-        this.score_ = 0;
-        this.paddle_ = null;
+            this.score_ = 0;
+            this.paddle_ = null;
         }
         increaseScore() {
-                this.score_ += 1;
+            this.score_ += 1;
         }
         set paddle(paddle) {
-                this.paddle_ = paddle;
+            this.paddle_ = paddle;
         }
         get score() {
-                return this.score_;
+            return this.score_;
         }
         get paddle() {
-                return this.paddle_;
+            return this.paddle_;
         }
 }
 
@@ -431,7 +432,7 @@ function createScene()  // A modified version of the scene from http://buildnewg
 	canvas1 = document.createElement('canvas');
 	context1 = canvas1.getContext('2d');
 	context1.fillStyle = "rgba(255,255,255,0.95)";
-    context1.textAlign="center";
+    context1.textAlign= "center";
     context1.textBaseline = 'middle';
 
 	// Tell the player what score is needed to win
@@ -463,12 +464,12 @@ function createScene()  // A modified version of the scene from http://buildnewg
 
 // The game loop
 function loop() {
-	renderer.render(scene, camera);
 	ballPhysics();
 	paddlePhysics();
 	cameraMovement();
 	playerPaddleMovement();
 	opponentPaddleMovement();
+	renderer.render(scene, camera);
 	requestAnimationFrame(loop);                
 }
 
