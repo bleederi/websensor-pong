@@ -31,7 +31,9 @@ if('RelativeOrientationSensor' in window) {
             this.x_ = 0;
             this.y_ = 0;
             this.z_ = 0;
-            this.sensor_.onreading = () => {
+
+            set onreading(func) {
+                super.onreading = () => {
                     let quat = this.sensor_.quaternion;
                     let quaternion = new THREE.Quaternion();        //Conversion to Euler angles done in THREE.js so we have to create a THREE.js object for holding the quaternion to convert from
                     let euler = new THREE.Euler( 0, 0, 0);  //Will hold the Euler angles corresponding to the quaternion
@@ -43,8 +45,8 @@ if('RelativeOrientationSensor' in window) {
                     this.x_ = euler.x;
                     this.y_ = euler.y;
                     this.z_ = euler.z;
-                    if (this.onreading_) this.onreading_();
-            };
+                    func();
+                };
             }
             start() { this.sensor_.start(); }
             stop() { this.sensor_.stop(); }
