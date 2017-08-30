@@ -27,7 +27,7 @@ if('RelativeOrientationSensor' in window) {
     window.RelativeInclinationSensor = class RelativeInclinationSensor extends RelativeOrientationSensor {
         constructor(options) {
             super(options);
-            this.sensor_ = new RelativeOrientationSensor({ frequency: 60 });
+            //this.sensor_ = new RelativeOrientationSensor({ frequency: 60 });
             this.x_ = 0;
             this.y_ = 0;
             this.z_ = 0;
@@ -35,6 +35,7 @@ if('RelativeOrientationSensor' in window) {
 
         set onreading(func) {
             super.onreading = () => {
+
                 // Conversion to Euler angles done in THREE.js so we have to create a
                 // THREE.js object for holding the quaternion to convert from
                 // Order x,y,z,w
