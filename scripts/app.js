@@ -54,7 +54,7 @@ if('RelativeOrientationSensor' in window) {
                 this.yaw_ = euler.x;
                 this.pitch_ = euler.y;
                 this.roll_ = euler.z;
-                if (this.func_ != null)
+                if (this.func_ !== null)
                     this.func_();
             };
         }
@@ -664,8 +664,7 @@ function resetBall(loser) {
 function matchScoreCheck() {
 
 	// If player has max points
-	if (player1.score >= maxScore && winner === null)
-	{
+	if (player1.score >= maxScore && winner === null) {
         winner = player1;
 
 		// Stop the ball
