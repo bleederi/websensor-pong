@@ -1,6 +1,6 @@
 {
-"name": "Websensor Pong demo",
-"short_name": "Websensor Pong demo",
+"name": "Sensor Pong",
+"short_name": "Sensor Pong",
 "display": "fullscreen",
 "orientation": "landscape"
 }

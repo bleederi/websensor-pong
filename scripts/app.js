@@ -176,11 +176,6 @@ const FOV = 50, ASPECT = 640 / 360, NEAR = 0.1, FAR = 10000;
 // Required for a THREE.js scene
 var camera, scene, renderer, oriSensor;
 
-// Sensor initialization
-var oriSensor = new RelativeInclinationSensor();
-var accelerometer = new ShakeSensor();
-accelerometer.onreading = () => { checkRestart(); };
-
 var pointLight, spotLight;
 
 // field variables
@@ -244,11 +239,16 @@ function init() {
     renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio( window.devicePixelRatio );
+    // Sensor initialization
+    oriSensor = new RelativeInclinationSensor( {frequency: 60} );
+    accelerometer = new ShakeSensor( {frequency: 60} );
+    accelerometer.onreading = () => { checkRestart(); };
 	scene.add(camera);
 	
 	// Set up all the objects in the scene (table, ball, paddles)	
 	createScene();
 
+    container.innerHTML = "";
 	container.appendChild(renderer.domElement);
 
     // Sensor initialization
