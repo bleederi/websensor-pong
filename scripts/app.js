@@ -107,22 +107,17 @@ class Player {
 // Camera constants
 const FOV = 50, ASPECT = 640 / 360, NEAR = 0.1, FAR = 10000;
 
-const container = document.getElementById("gameCanvas");
-
 //Sensor initialization
 var oriSensor = new RelativeInclinationSensor();
 var accelerometer = new ShakeSensor();
 accelerometer.onreading = () => { checkRestart(); };
 
-//Required for a THREE.js scene
-var renderer = new THREE.WebGLRenderer();
-var scene = new THREE.Scene();
+// Required for a THREE.js scene
+var camera, scene, renderer;
 
 var pointLight, spotLight;
 
-var camera;
-
-// field variables
+// Field variables
 var fieldWidth = 400, fieldHeight = 200;
 
 // paddle variables
@@ -173,12 +168,15 @@ if ('serviceWorker' in navigator) {
         });
 }
 
-function init()
-{
-        //ThreeJS scene setup below
-        camera = new THREE.PerspectiveCamera(FOV, ASPECT, NEAR, FAR);
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio( window.devicePixelRatio );
+function init() {
+
+    const container = document.getElementById("gameCanvas");
+    // ThreeJS scene setup below
+    camera = new THREE.PerspectiveCamera(FOV, ASPECT, NEAR, FAR);
+    scene = new THREE.Scene();
+    renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio( window.devicePixelRatio );
 	scene.add(camera);
 	
 	//Set up all the objects in the scene (table, ball, paddles)	
