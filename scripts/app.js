@@ -31,9 +31,8 @@ if('RelativeOrientationSensor' in window) {
             this.x_ = 0;
             this.y_ = 0;
             this.z_ = 0;
-        }
+            this.func_ = null;
 
-        set onreading(func) {
             super.onreading = () => {
 
                 // Conversion to Euler angles done in THREE.js so we have to create a
@@ -53,8 +52,13 @@ if('RelativeOrientationSensor' in window) {
                 this.x_ = euler.x;
                 this.y_ = euler.y;
                 this.z_ = euler.z;
-                func();
+                if (this.func_ != null)
+                    this.func_();
             };
+        }
+
+        set onreading(func) {
+            this.func_ = func;
         }
 
         get x() {
@@ -190,7 +194,7 @@ function init() {
     renderer.setPixelRatio( window.devicePixelRatio );
 	scene.add(camera);
     oriSensor = new RelativeInclinationSensor( {frequency: 60} );
-    oriSensor.onreading = asd;
+    //oriSensor.onreading = asd;
     accelerometer = new ShakeSensor( {frequency: 60} );
     accelerometer.onreading = () => { checkRestart(); };
 	
