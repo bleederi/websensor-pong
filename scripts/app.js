@@ -25,6 +25,7 @@
 // If generic sensors are enabled and RelativeOrientationSensor is defined, create class normally
 // Otherwise create a fake class
 if('RelativeOrientationSensor' in window) {
+
     // This is a tilt sensor that uses RelativeOrientationSensor
     // and converts the quaternion to Euler angles
     window.TiltSensor = class RelativeInclinationSensor extends RelativeOrientationSensor {
@@ -33,6 +34,7 @@ if('RelativeOrientationSensor' in window) {
             this.yaw_ = 0;
             this.pitch_ = 0;
             this.roll_ = 0;
+            this.direction_ = null;
             this.func_ = null;
 
             super.onreading = () => {
@@ -54,6 +56,22 @@ if('RelativeOrientationSensor' in window) {
                 this.yaw_ = euler.x;
                 this.pitch_ = euler.y;
                 this.roll_ = euler.z;
+
+                // Calculate tilt direction
+                // Here need to account for the screen orientation
+                switch(screen.orientation.angle) {
+                    default:
+                    case 0:
+                        this.pitch_ < 0 ? this.direction_ = "left" : this.direction_ = "right";
+                    break;
+                    case 90:
+                        this.yaw_ < 0 ? this.direction_ = "left" : this.direction_ = "right";
+                    break;
+                    case 270:
+                        this.yaw_ < 0 ? this.direction_ = "right" : this.direction_ = "left";
+                    break;
+                }
+
                 if (this.func_ !== null)
                     this.func_();
             };
@@ -72,11 +90,15 @@ if('RelativeOrientationSensor' in window) {
         get roll() {
                 return this.roll_;
         }
+
+        get direction() {
+                return this.direction_;
+        }
     }
 } else {
 
     // Fake interface
-    window.RelativeInclinationSensor = class RelativeInclinationSensor {
+    window.TiltSensor = class RelativeInclinationSensor {
         constructor(options) {
             this.start = function() {};
         }
@@ -93,6 +115,10 @@ if('RelativeOrientationSensor' in window) {
 
         get roll() {
             return 0;
+        }
+
+        get direction() {
+            return null;
         }
     }
 
@@ -547,20 +573,17 @@ function playerPaddleMovement() {
         let direction = tiltSensor.direction;
         let force = 0;
         switch(screen.orientation.angle) {
-                default:
-                case 0:
-                        tiltSensor.pitch < 0 ? direction = "left" : direction = "right";
-                        force = Math.abs(tiltSensor.pitch);
-                break;
-                case 90:
-                        tiltSensor.yaw < 0 ? direction = "left" : direction = "right";
-                        force = Math.abs(tiltSensor.yaw);
-                break;
-                case 270:
-                        tiltSensor.yaw < 0 ? direction = "right" : direction = "left";
-                        force = Math.abs(tiltSensor.yaw);
-                break;
-                }
+            default:
+            case 0:
+                force = Math.abs(tiltSensor.pitch);
+            break;
+            case 90:
+                force = Math.abs(tiltSensor.yaw);
+            break;
+            case 270:
+                force = Math.abs(tiltSensor.yaw);
+            break;
+        }
 	if (direction === "left") {
 
 		// If the paddle is not touching the side of table then move
