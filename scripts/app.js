@@ -30,11 +30,9 @@ if('RelativeOrientationSensor' in window) {
     window.RelativeInclinationSensor = class RelativeInclinationSensor extends RelativeOrientationSensor {
         constructor(options) {
             super(options);
-            this.yaw_ = 0;
-            this.pitch_ = 0;
-            this.roll_ = 0;
-            this.longitudeInitial_ = 0;
-            this.initialOriObtained_ = false;
+            this.x_ = 0;
+            this.y_ = 0;
+            this.z_ = 0;
         }
 
         set onreading(func) {
@@ -53,23 +51,23 @@ if('RelativeOrientationSensor' in window) {
                 let angleOrder = null;
                 screen.orientation.angle === 0 ? angleOrder = 'ZYX' : angleOrder = 'ZXY';
                 euler.setFromQuaternion(quaternion, angleOrder);
-                this.yaw_ = euler.x;
-                this.pitch_ = euler.y;
-                this.roll_ = euler.z;
+                this.x_ = euler.x;
+                this.y_ = euler.y;
+                this.z_ = euler.z;
                 func();
             };      
         }
 
         get x() {
-            return this.yaw_;
+            return this.x_;
         }
 
         get y() {
-            return this.pitch_;
+            return this.y_;
         }
 
         get z() {
-            return this.roll_;
+            return this.z_;
         }
     }
 } else {
@@ -94,7 +92,7 @@ if('RelativeOrientationSensor' in window) {
         }
     }
     // Inform the user that generic sensors are not enabled
-    document.getElementById("no-sensors").style.display = "block";
+    //document.getElementById("no-sensors").style.display = "block";
 }
 
 //This is a shake detection sensor that uses Accelerometer
