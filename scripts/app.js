@@ -544,7 +544,7 @@ function opponentPaddleMovement() {
 
 // Handles player's paddle movement
 function playerPaddleMovement() {
-        let direction = null;
+        let direction = tiltSensor.direction;
         let force = 0;
         switch(screen.orientation.angle) {
                 default:
@@ -561,82 +561,78 @@ function playerPaddleMovement() {
                         force = Math.abs(tiltSensor.yaw);
                 break;
                 }
-	if (direction === "left")		
-	{
-		//If paddle is not touching the side of table then move
+	if (direction === "left") {
+
+		// If the paddle is not touching the side of table then move
 		if (player1.paddle.position.y < fieldHeight * 0.45)
 		{
 			paddle1DirY = paddleSpeed * force;
-		}
-		else
-		{
+		} else {
 			paddle1DirY = 0;
 		}
 	}	
-	else if (direction === "right")
-	{
+	else if (direction === "right") {
 		if (player1.paddle.position.y > -fieldHeight * 0.45)
 		{
 			paddle1DirY = -paddleSpeed * force;
-		}
-		else
-		{
+		} else {
 			paddle1DirY = 0;
 		}
-	}
-	else
-	{
-		//Stop the paddle (no direction)
+	} else {
+
+		// Stop the paddle (no direction)
 		paddle1DirY = 0;
 	}	
 	player1.paddle.position.y += paddle1DirY;
 }
 
 // Handles camera and lighting logic
-function cameraMovement()
-{	
-	// move to behind the player's paddle
+function cameraMovement() {
+
+	// Move behind the paddle
 	camera.position.x = player1.paddle.position.x - 100;
 	camera.position.y += (player1.paddle.position.y - camera.position.y) * 0.05;
 	camera.position.z = player1.paddle.position.z + 100 + 0.04 * (-ball.position.x + player1.paddle.position.x);
 	
-	// rotate to face towards the opponent
+	// Rotate to face towards the opponent
 	camera.rotation.x = -0.01 * (ball.position.y) * Math.PI/180;
 	camera.rotation.y = -60 * Math.PI/180;
 	camera.rotation.z = -90 * Math.PI/180;
 }
 
 // Handles paddle collision logic
-function paddlePhysics()
-{	
-	//If ball is aligned with paddle1 on x plane
+function paddlePhysics() {
+	
+	// If the ball is aligned with paddle1 on x plane
 	if (ball.position.x <= player1.paddle.position.x + paddleWidth
 	&&  ball.position.x >= player1.paddle.position.x - paddleWidth)
-	{
-		//And if ball is aligned with paddle1 on y plane
-		if (ball.position.y <= player1.paddle.position.y + paddleHeight/2
-		&&  ball.position.y >= player1.paddle.position.y - paddleHeight/2)
+    {
+
+	    // And if the ball is aligned with paddle1 on y plane
+	    if (ball.position.y <= player1.paddle.position.y + paddleHeight/2
+	    &&  ball.position.y >= player1.paddle.position.y - paddleHeight/2)
 		{
-			//And if ball is travelling towards player (-ve direction)
-			if (ballDirX < 0)
-			{
-				//Bounce
+
+			// And if the ball is travelling towards player
+			if (ballDirX < 0) {
+
+				// Bounce
 				ballDirX = -ballDirX;
-				//Impact ball angle when hitting it to make it possible to direct the ball
+
+				// Impact ball angle when hitting it to make it possible to direct the ball
 				ballDirY -= paddle1DirY * 0.4;
 			}
 		}
 	}
 
-        //Same for opponent paddle
+    // Same for opponent paddle
 	if (ball.position.x <= player2.paddle.position.x + paddleWidth
 	&&  ball.position.x >= player2.paddle.position.x - paddleWidth)
 	{
 		if (ball.position.y <= player2.paddle.position.y + paddleHeight/2
 		&&  ball.position.y >= player2.paddle.position.y - paddleHeight/2)
 		{
-			if (ballDirX > 0)
-			{
+			if (ballDirX > 0) {
 				ballDirX = -ballDirX;
 				ballDirY -= paddle2DirY * 0.7;
 			}
@@ -644,45 +640,44 @@ function paddlePhysics()
 	}
 }
 
-function resetBall(loser)
-{
-	//Reset ball position
+function resetBall(loser) {
+
+	// Reset ball position
 	ball.position.x = 0;
 	ball.position.y = 0;
 	
-	//If player lost the last point, we send the ball towards the opponent
-	if (loser == player1)
-	{
+	// If the player lost the last point, we send the ball towards the opponent
+	if (loser == player1) {
 		ballDirX = -1;
 	}
-	//If opponent lost, we send ball towards the player
-	else if (loser === player2)
-	{
+
+	// If opponent lost, we send ball towards the player
+	else if (loser === player2) {
 		ballDirX = 1;
 	}
 	
-	//Set the ball to move +ve in y plane (towards left from the camera)
+	// Set the ball to move +ve in y plane (towards left from the camera)
 	ballDirY = 1;
 }
 
-var bounceTime = 0;
-//Checks if either player or opponent has reached max points
-function matchScoreCheck()
-{
-	//If player has max points
+// Checks if either player or opponent has reached max points
+function matchScoreCheck() {
+
+	// If player has max points
 	if (player1.score >= maxScore && winner === null)
 	{
-                winner = player1;
-		//Stop the ball
+        winner = player1;
+
+		// Stop the ball
 		ballSpeed = 0;
-                updateScoreboard("Bold 20px Arial", "You win, congratulations!");
+        updateScoreboard("Bold 20px Arial", "You win, congratulations!");
 	}
-	//If opponent has max points
-	else if (player2.score >= maxScore && winner === null)
-	{
-                winner = player2;
+
+	// If opponent has max points
+	else if (player2.score >= maxScore && winner === null) {
+        winner = player2;
 		ballSpeed = 0;
-                updateScoreboard("Bold 20px Arial", "Opponent wins!");
+        updateScoreboard("Bold 20px Arial", "Opponent wins!");
 	}
 }
 
