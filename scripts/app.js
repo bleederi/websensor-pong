@@ -32,9 +32,6 @@ if('RelativeOrientationSensor' in window) {
     window.TiltSensor = class RelativeInclinationSensor extends RelativeOrientationSensor {
         constructor(options) {
             super(options);
-            this.yaw_ = 0;
-            this.pitch_ = 0;
-            this.roll_ = 0;
             this.direction_ = null;
             this.angle_ = 0;
             this.func_ = null;
@@ -55,25 +52,22 @@ if('RelativeOrientationSensor' in window) {
                 let angleOrder = null;
                 screen.orientation.angle === 0 ? angleOrder = 'ZYX' : angleOrder = 'ZXY';
                 euler.setFromQuaternion(quaternion, angleOrder);
-                this.yaw_ = euler.x;
-                this.pitch_ = euler.y;
-                this.roll_ = euler.z;
 
                 // Calculate tilt direction and angle
                 // Here need to account for the screen orientation
                 switch(screen.orientation.angle) {
                     default:
                     case 0:
-                        this.pitch_ < 0 ? this.direction_ = "left" : this.direction_ = "right";
-                        this.angle_ = Math.sin(Math.abs(this.pitch_));
+                        euler.y < 0 ? this.direction_ = "left" : this.direction_ = "right";
+                        this.angle_ = Math.sin(Math.abs(euler.y));
                     break;
                     case 90:
-                        this.yaw_ < 0 ? this.direction_ = "left" : this.direction_ = "right";
-                        this.angle_ = Math.sin(Math.abs(this.yaw_));
+                        euler.x < 0 ? this.direction_ = "left" : this.direction_ = "right";
+                        this.angle_ = Math.sin(Math.abs(euler.x));
                     break;
                     case 270:
-                        this.yaw_ < 0 ? this.direction_ = "right" : this.direction_ = "left";
-                        this.angle_ = Math.sin(Math.abs(this.yaw_));
+                        euler.x < 0 ? this.direction_ = "right" : this.direction_ = "left";
+                        this.angle_ = Math.sin(Math.abs(euler.x));
                     break;
                 }
 
@@ -469,14 +463,12 @@ function createScene()  // A modified version of the scene from http://buildnewg
 
 // The game loop
 function loop() {
-
 	renderer.render(scene, camera);
 	ballPhysics();
 	paddlePhysics();
 	cameraMovement();
 	playerPaddleMovement();
 	opponentPaddleMovement();
-
 	requestAnimationFrame(loop);                
 }
 
