@@ -61,13 +61,13 @@ if('RelativeOrientationSensor' in window) {
             this.func_ = func;
         }
 
-        get x() {
+        get yaw() {
                 return this.yaw_;
         }
-        get y() {
+        get pitch() {
                 return this.pitch_;
         } 
-        get z() {
+        get roll() {
                 return this.roll_;
         }
     }
@@ -80,15 +80,15 @@ if('RelativeOrientationSensor' in window) {
 
         set onreading(func) {}
 
-        get x() {
+        get yaw() {
             return 0;
         }
 
-        get y() {
+        get pitch() {
             return 0;
         }
 
-        get z() {
+        get roll() {
             return 0;
         }
     }
@@ -177,10 +177,6 @@ if ('serviceWorker' in navigator) {
         });
 }
 
-function asd() {
-
-}
-
 // This function sets up the three.js scene, initializes the sensors and adds the canvas to the DOM
 function init() {
 
@@ -194,7 +190,6 @@ function init() {
     renderer.setPixelRatio( window.devicePixelRatio );
 	scene.add(camera);
     oriSensor = new RelativeInclinationSensor( {frequency: 60} );
-    //oriSensor.onreading = asd;
     accelerometer = new ShakeSensor( {frequency: 60} );
     accelerometer.onreading = () => { checkRestart(); };
 	
@@ -214,10 +209,10 @@ function init() {
         renderer.setSize(window.innerWidth, window.innerHeight);
     }, false);
 	
-	render();
+	loop();
 
     // Timer in ms, lowest possible value is 10, accurate enough though
-    timerVar=setInterval(function(){time = time + 10;},10);
+    timerVar = setInterval(function(){time = time + 10;},10);
 }
 
 function createScene()  // A modified version of the scene from http://buildnewgames.com/webgl-threejs/
@@ -263,7 +258,6 @@ function createScene()  // A modified version of the scene from http://buildnewg
 	// Create the playing surface plane
 	var plane = new THREE.Mesh(
 
-    // 95% of table width, since we want to show where the ball goes out of bounds
 	  new THREE.PlaneGeometry(
 		planeWidth * 0.95,
 		planeHeight,
@@ -277,15 +271,16 @@ function createScene()  // A modified version of the scene from http://buildnewg
 	
 	let table = new THREE.Mesh(
 
-	  new THREE.CubeGeometry(
-		planeWidth * 1.05,
-		planeHeight * 1.03,
-		100,
-		planeQuality,
-		planeQuality,
-		1),
+        new THREE.CubeGeometry(
+        planeWidth * 1.05,
+        planeHeight * 1.03,
+        100,
+        planeQuality,
+        planeQuality,
+        1),
 
-	  tableMaterial);
+        tableMaterial);
+
 	table.position.z = -51;
 	scene.add(table);
 	table.receiveShadow = true;	
@@ -334,8 +329,7 @@ function createScene()  // A modified version of the scene from http://buildnewg
 	player2.paddle.position.z = paddleDepth;
 		
     // Create pillars
-	for (var i = 0; i < 5; i++)
-	{
+	for (var i = 0; i < 5; i++) {
 		let backdrop = new THREE.Mesh(
 		
 		  new THREE.CubeGeometry( 
@@ -355,8 +349,7 @@ function createScene()  // A modified version of the scene from http://buildnewg
 		backdrop.receiveShadow = true;		  
 		scene.add(backdrop);	
 	}
-	for (var i=0; i<5; i++)
-	{
+	for (var i=0; i<5; i++) {
 		var backdrop = new THREE.Mesh(
 
 		  new THREE.CubeGeometry( 
@@ -414,7 +407,7 @@ function createScene()  // A modified version of the scene from http://buildnewg
     
 	// Canvas contents will be used for a texture
 	texture1 = new THREE.Texture(canvas1);
-        texture1.minFilter = THREE.LinearFilter;
+    texture1.minFilter = THREE.LinearFilter;
 	texture1.needsUpdate = true;
       
     let material1 = new THREE.MeshBasicMaterial( {map: texture1, side:THREE.DoubleSide } );
@@ -434,15 +427,17 @@ function createScene()  // A modified version of the scene from http://buildnewg
 	renderer.shadowMap.enabled = true;		
 }
 
-function render() {	
+// The game loop
+function loop() {
+
 	renderer.render(scene, camera);
-	requestAnimationFrame(render);
-	
 	ballPhysics();
 	paddlePhysics();
 	cameraMovement();
 	playerPaddleMovement();
-	opponentPaddleMovement();                  
+	opponentPaddleMovement();
+
+	requestAnimationFrame(loop);                
 }
 
 function ballPhysics() {
@@ -531,16 +526,16 @@ function playerPaddleMovement() {
         switch(screen.orientation.angle) {
                 default:
                 case 0:
-                        oriSensor.y < 0 ? direction = "left" : direction = "right";
-                        force = Math.abs(oriSensor.y);
+                        oriSensor.pitch < 0 ? direction = "left" : direction = "right";
+                        force = Math.abs(oriSensor.pitch);
                 break;
                 case 90:
-                        oriSensor.x < 0 ? direction = "left" : direction = "right";
-                        force = Math.abs(oriSensor.x);
+                        oriSensor.yaw < 0 ? direction = "left" : direction = "right";
+                        force = Math.abs(oriSensor.yaw);
                 break;
                 case 270:
-                        oriSensor.x < 0 ? direction = "right" : direction = "left";
-                        force = Math.abs(oriSensor.x);
+                        oriSensor.yaw < 0 ? direction = "right" : direction = "left";
+                        force = Math.abs(oriSensor.yaw);
                 break;
                 }
 	if (direction === "left")		
