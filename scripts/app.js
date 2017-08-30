@@ -49,8 +49,7 @@ if('RelativeOrientationSensor' in window) {
                 func();
             };
         }
-        start() { this.sensor_.start(); }
-        stop() { this.sensor_.stop(); }
+
         get x() {
                 return this.x_;
         }
