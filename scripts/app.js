@@ -113,10 +113,10 @@ var camera, scene, renderer, oriSensor, accelerometer;
 var pointLight, spotLight;
 
 // Field variables
-var fieldWidth = 400, fieldHeight = 200;
+const fieldWidth = 400, fieldHeight = 200;
 
-// paddle variables
-var paddleWidth, paddleHeight, paddleDepth, paddleQuality;
+// Paddle variables
+const paddleWidth = 10, paddleHeight = 30, paddleDepth = 10, paddleQuality = 1;
 var paddle1DirY = 0, paddle2DirY = 0, paddleSpeed = 8;
 
 // ball variables
@@ -283,12 +283,6 @@ function createScene()  //A modified version of the scene from http://buildnewga
 	ball.position.z = radius;
 	ball.receiveShadow = true;
         ball.castShadow = true;
-	
-	//Paddle vars
-	paddleWidth = 10;
-	paddleHeight = 30;
-	paddleDepth = 10;
-	paddleQuality = 1;
 
         let paddleGeom = new THREE.CubeGeometry(
 		paddleWidth,
