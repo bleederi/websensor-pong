@@ -110,8 +110,6 @@ const FOV = 50, ASPECT = 640 / 360, NEAR = 0.1, FAR = 10000;
 // Required for a THREE.js scene
 var camera, scene, renderer, oriSensor, accelerometer;
 
-var pointLight, spotLight;
-
 // Field variables
 const fieldWidth = 400, fieldHeight = 200;
 
@@ -372,13 +370,13 @@ function createScene()  //A modified version of the scene from http://buildnewga
 	scene.add(ground);		
 		
 	//Create a point light to make the scene look nicer
-	pointLight = new THREE.PointLight(0xF8D898);
-	pointLight.position.x = -1000;
-	pointLight.position.y = 0;
-	pointLight.position.z = 1000;
-	pointLight.intensity = 2.9;
-	pointLight.distance = 10000;
-	scene.add(pointLight);
+	let light = new THREE.PointLight(0xF8D898);
+	light.position.x = -1000;
+	light.position.y = 0;
+	light.position.z = 1000;
+	light.intensity = 2.9;
+	light.distance = 10000;
+	scene.add(light);
 
 	//Scoreboard
 	canvas1 = document.createElement('canvas');
