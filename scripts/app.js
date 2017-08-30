@@ -178,7 +178,7 @@ var camera, scene, renderer, tiltSensor, shakeSensor;
 const fieldWidth = 400, fieldHeight = 200;
 
 // Paddle variables
-const paddleWidth = 10, paddleHeight = 30, paddleDepth = 10, paddleQuality = 1, paddleSpeed = 8;
+const paddleWidth = 10, paddleHeight = 30, paddleDepth = 10, paddleQuality = 1, paddleSpeed = 10;
 var paddle1DirY = 0, paddle2DirY = 0;
 
 // Ball variables
