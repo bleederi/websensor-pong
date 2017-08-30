@@ -114,40 +114,28 @@ var camera, scene, renderer, oriSensor, accelerometer;
 const fieldWidth = 400, fieldHeight = 200;
 
 // Paddle variables
-const paddleWidth = 10, paddleHeight = 30, paddleDepth = 10, paddleQuality = 1;
-var paddle1DirY = 0, paddle2DirY = 0, paddleSpeed = 8;
+const paddleWidth = 10, paddleHeight = 30, paddleDepth = 10, paddleQuality = 1, paddleSpeed = 8;
+var paddle1DirY = 0, paddle2DirY = 0;
 
-// ball variables
+// Ball variables
 var ball;
-var radius = 5;
+const radius = 5;
 var ballDirX = 1, ballDirY = 1;
 
 const ballSpeedInitial = 2;     // The initial ball speed value stored for later use
 var ballSpeed = ballSpeedInitial;
 
 // Timer
-var time=0;
-var timerVar = null;
+var time = 0, timerVar = null;
 
-var player1 = new Player();
-var player2 = new Player();
+var player1 = new Player(), player2 = new Player();
 
 var winner = null;
 
-const maxScore = 7;
+const maxScore = 7, difficulty = 0.2; // Opponent difficulty between 0 and 1, greater is harder
 
-// Opponent difficulty (between 0 and 1)
-var difficulty = 0.2;
-
-//For the scoreboard canvas
-var canvas1 = null;
-var context1 = null;
-var texture1 = null;
-
-//Shaking counter
-var shakingvar = 0;
-var prevAccelMag = null;
-const sensorFreq = 60;
+// For the scoreboard canvas
+var canvas1 = null, context1 = null, texture1 = null;
 
 // Service worker registration
 if ('serviceWorker' in navigator) {
@@ -197,14 +185,14 @@ function init() {
     timerVar=setInterval(function(){time = time + 10;},10);
 }
 
-function createScene()  //A modified version of the scene from http://buildnewgames.com/webgl-threejs/
+function createScene()  // A modified version of the scene from http://buildnewgames.com/webgl-threejs/
 {
-	//Set up the playing surface plane 
+	// Set up the playing surface plane 
 	let planeWidth = fieldWidth,
 		planeHeight = fieldHeight,
 		planeQuality = 10;
 		
-	//Create materials for the objects
+	// Create materials for the objects
 	let paddle1Material =
 	  new THREE.MeshLambertMaterial(
 		{
@@ -237,11 +225,12 @@ function createScene()  //A modified version of the scene from http://buildnewga
 		});
 		
 		
-	//Create the playing surface plane
+	// Create the playing surface plane
 	var plane = new THREE.Mesh(
 
+    // 95% of table width, since we want to show where the ball goes out of bounds
 	  new THREE.PlaneGeometry(
-		planeWidth * 0.95,	//95% of table width, since we want to show where the ball goes out of bounds
+		planeWidth * 0.95,
 		planeHeight,
 		planeQuality,
 		planeQuality),
@@ -266,54 +255,53 @@ function createScene()  //A modified version of the scene from http://buildnewga
 	scene.add(table);
 	table.receiveShadow = true;	
 		
-	//Create the ball
+	// Create the ball
 	let sphereMaterial =
-	  new THREE.MeshLambertMaterial(
-		{
-		  color: "white"
-		});
+    new THREE.MeshLambertMaterial(
+    {
+        color: "white"
+    });
 	ball = new THREE.Mesh(new THREE.SphereGeometry(radius, 6, 6), sphereMaterial);
-
 	scene.add(ball);
 	
 	ball.position.x = 0;
 	ball.position.y = 0;
 	ball.position.z = radius;
 	ball.receiveShadow = true;
-        ball.castShadow = true;
+    ball.castShadow = true;
 
-        let paddleGeom = new THREE.CubeGeometry(
-		paddleWidth,
-		paddleHeight,
-		paddleDepth,
-		paddleQuality,
-		paddleQuality,
-		paddleQuality);
+    let paddleGeom = new THREE.CubeGeometry(
+	    paddleWidth,
+	    paddleHeight,
+	    paddleDepth,
+	    paddleQuality,
+	    paddleQuality,
+	    paddleQuality);
 		
 	let paddle1 = new THREE.Mesh(
-                paddleGeom,
-	        paddle1Material);
+        paddleGeom,
+        paddle1Material);
 
 	
 	let paddle2 = new THREE.Mesh(
 		paddleGeom,
-                paddle2Material);
+        paddle2Material);
 
-        player1.paddle = paddle1;
-        player2.paddle = paddle2;
+    player1.paddle = paddle1;
+    player2.paddle = paddle2;
 	scene.add(paddle1);  
 	scene.add(paddle2);
 	
-	//Position the paddles
+	// Position the paddles
 	player1.paddle.position.x = -fieldWidth/2 + paddleWidth;
 	player2.paddle.position.x = fieldWidth/2 - paddleWidth;
 	player1.paddle.position.z = paddleDepth;
 	player2.paddle.position.z = paddleDepth;
 		
-        //Create pillars
+    // Create pillars
 	for (var i = 0; i < 5; i++)
 	{
-		var backdrop = new THREE.Mesh(
+		let backdrop = new THREE.Mesh(
 		
 		  new THREE.CubeGeometry( 
 		  30, 
@@ -332,7 +320,7 @@ function createScene()  //A modified version of the scene from http://buildnewga
 		backdrop.receiveShadow = true;		  
 		scene.add(backdrop);	
 	}
-	for (var i = 0; i < 5; i++)
+	for (var i=0; i<5; i++)
 	{
 		var backdrop = new THREE.Mesh(
 
@@ -354,22 +342,21 @@ function createScene()  //A modified version of the scene from http://buildnewga
 		scene.add(backdrop);	
 	}
 	
-	//Add a ground plane for decoration
+	// Add a ground plane for decoration
 	let ground = new THREE.Mesh(
-
-	  new THREE.CubeGeometry( 
-	  1000, 
-	  1000, 
-	  3, 
-	  1, 
-	  1,
-	  1 ),
-	  groundMaterial);
+        new THREE.CubeGeometry( 
+        1000, 
+        1000, 
+        3, 
+        1, 
+        1,
+        1 ),
+        groundMaterial);
 	ground.position.z = -132;
 	ground.receiveShadow = true;	
 	scene.add(ground);		
 		
-	//Create a point light to make the scene look nicer
+	// Create a point light to make the scene look nicer
 	let light = new THREE.PointLight(0xF8D898);
 	light.position.x = -1000;
 	light.position.y = 0;
@@ -378,40 +365,41 @@ function createScene()  //A modified version of the scene from http://buildnewga
 	light.distance = 10000;
 	scene.add(light);
 
-	//Scoreboard
+	// Scoreboard
 	canvas1 = document.createElement('canvas');
 	context1 = canvas1.getContext('2d');
 	context1.fillStyle = "rgba(255,255,255,0.95)";
-        context1.textAlign="center";
-        context1.textBaseline = 'middle';
-	//Tell the player what score is needed to win
+    context1.textAlign="center";
+    context1.textBaseline = 'middle';
+
+	// Tell the player what score is needed to win
 	context1.font = "Bold 20px Arial";
 	context1.fillText("First to " + maxScore + " wins", canvas1.width/2, canvas1.height/2);
 	context1.font = "Bold 40px Arial";
     
-	//Canvas contents will be used for a texture
+	// Canvas contents will be used for a texture
 	texture1 = new THREE.Texture(canvas1);
         texture1.minFilter = THREE.LinearFilter;
 	texture1.needsUpdate = true;
       
-        let material1 = new THREE.MeshBasicMaterial( {map: texture1, side:THREE.DoubleSide } );
-        material1.transparent = true;
+    let material1 = new THREE.MeshBasicMaterial( {map: texture1, side:THREE.DoubleSide } );
+    material1.transparent = true;
 
-        let mesh1 = new THREE.Mesh(
-        new THREE.PlaneGeometry(canvas1.width, canvas1.height),
+    let mesh1 = new THREE.Mesh(
+    new THREE.PlaneGeometry(canvas1.width, canvas1.height),
         material1
-        );
+    );
 	mesh1.position.set(fieldWidth/2, 0, 40);
 	scene.add( mesh1 );
-        //Rotate the text so it faces the player
-        mesh1.rotateZ(-Math.PI/2);
-        mesh1.rotateX(Math.PI/2);
+
+    // Rotate the text so it faces the player
+    mesh1.rotateZ(-Math.PI/2);
+    mesh1.rotateX(Math.PI/2);
 
 	renderer.shadowMap.enabled = true;		
 }
 
-function render()
-{	
+function render() {	
 	renderer.render(scene, camera);
 	requestAnimationFrame(render);
 	
@@ -419,30 +407,31 @@ function render()
 	paddlePhysics();
 	cameraMovement();
 	playerPaddleMovement();
-	opponentPaddleMovement();
-        //checkRestart(); //Check if the player wants to restart the game                            
+	opponentPaddleMovement();                  
 }
 
 function ballPhysics()
 {
-        ballSpeed = ballSpeedInitial + (ballSpeedInitial * time/10000); //Increase ball speed with time
-        ballSpeed = Math.max(ballSpeedInitial, Math.min(ballSpeed, 6))     //Clamp the speed
-	//Ball goes off the player's side - opponent scores
-	if (ball.position.x <= -fieldWidth/2)
-	{	
-		player2.increaseScore();
-	        resetBall(player2);
-                time = 0;       //Reset timer
-		//Update scoreboard only if no winner
-                if(winner === null)
-                {
-                        updateScoreboard("Bold 40px Arial", player1.score + '-' + player2.score);
-		        matchScoreCheck();
-                }
-	}	
+    // Increase ball speed with time
+    ballSpeed = ballSpeedInitial + (ballSpeedInitial * time/10000);
+
+    // Clamp the speed
+    ballSpeed = Math.max(ballSpeedInitial, Math.min(ballSpeed, 6));
+
+	// Ball goes off the player's side - opponent scores
+	if (ball.position.x <= -fieldWidth/2) {	
+	    player2.increaseScore();
+        resetBall(player2);
+        time = 0;       //Reset timer
+
+        //Update scoreboard only if no winner
+        if(winner === null)
+        {
+            updateScoreboard("Bold 40px Arial", player1.score + '-' + player2.score);
+            matchScoreCheck();
+        }
 	//Ball goes off the CPU's side - player scores
-	else if (ball.position.x >= fieldWidth/2)
-	{
+    } else if (ball.position.x >= fieldWidth/2) {
 	        player1.increaseScore();
                 resetBall(player1);
                 time = 0;
@@ -508,8 +497,7 @@ function opponentPaddleMovement()
 
 
 // Handles player's paddle movement
-function playerPaddleMovement()
-{
+function playerPaddleMovement() {
         let direction = null;
         let force = 0;
         switch(screen.orientation.angle) {
@@ -652,38 +640,34 @@ function matchScoreCheck()
 	}
 }
 
-function updateScoreboard(font, text)
-{
+function updateScoreboard(font, text) {
         context1.clearRect(0, 0, canvas1.width, canvas1.height);
         context1.font = font;
         context1.fillText(text, canvas1.width/2, canvas1.height/2);
         texture1.needsUpdate = true;
 }
 
-function checkRestart()
-{
-        if(accelerometer.shaking)
-        {
-                console.log("SHAKE");
-                //Save the paddles
-                let paddle1 = player1.paddle;
-                let paddle2 = player2.paddle;
-                //Initialize players, variables and scene again
-                player1 = new Player();
-                player2 = new Player();
-                player1.paddle = paddle1;
-                player2.paddle = paddle2;
-                ballSpeed = ballSpeedInitial;
-                winner = null;
-	        ball.position.x = 0;
-	        ball.position.y = 0;
-	        ball.position.z = radius;
-	        player1.paddle.position.x = -fieldWidth/2 + paddleWidth;
-	        player2.paddle.position.x = fieldWidth/2 - paddleWidth;
-	        player1.paddle.position.z = paddleDepth;
-	        player2.paddle.position.z = paddleDepth;
-                time = 0;
-                updateScoreboard("Bold 20px Arial","First to " + maxScore + " wins");
-        }
+function checkRestart() {
+    if(accelerometer.shaking) {
+        // Save the paddles
+        let paddle1 = player1.paddle;
+        let paddle2 = player2.paddle;
+        // Initialize players, variables and scene again
+        player1 = new Player();
+        player2 = new Player();
+        player1.paddle = paddle1;
+        player2.paddle = paddle2;
+        ballSpeed = ballSpeedInitial;
+        winner = null;
+        ball.position.x = 0;
+        ball.position.y = 0;
+        ball.position.z = radius;
+        player1.paddle.position.x = -fieldWidth/2 + paddleWidth;
+        player2.paddle.position.x = fieldWidth/2 - paddleWidth;
+        player1.paddle.position.z = paddleDepth;
+        player2.paddle.position.z = paddleDepth;
+        time = 0;
+        updateScoreboard("Bold 20px Arial","First to " + maxScore + " wins");
+    }
 }
 
