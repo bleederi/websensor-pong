@@ -35,14 +35,20 @@ if('RelativeOrientationSensor' in window) {
 
         set onreading(func) {
             super.onreading = () => {
-                let quat = this.sensor_.quaternion;
-                let quaternion = new THREE.Quaternion();        //Conversion to Euler angles done in THREE.js so we have to create a THREE.js object for holding the quaternion to convert from
-                let euler = new THREE.Euler( 0, 0, 0);  //Will hold the Euler angles corresponding to the quaternion
-                quaternion.set(quat[0], quat[1], quat[2], quat[3]);     //x,y,z,w
-                //Order of rotations must be adapted depending on orientation - for portrait ZYX, for landscape ZXY
+                // Conversion to Euler angles done in THREE.js so we have to create a
+                // THREE.js object for holding the quaternion to convert from
+                // Order x,y,z,w
+                let quaternion = new THREE.Quaternion(super.quaternion[0], super.quaternion[1],
+                                                      super.quaternion[2], super.quaternion[3]);
+
+                // euler will hold the Euler angles corresponding to the quaternion
+                let euler = new THREE.Euler(0, 0, 0);
+
+                // Order of rotations must be adapted depending on orientation
+                // for portrait ZYX, for landscape ZXY
                 let angleOrder = null;
                 screen.orientation.angle === 0 ? angleOrder = 'ZYX' : angleOrder = 'ZXY';
-                euler.setFromQuaternion(quaternion, angleOrder);     //ZYX works in portrait, ZXY in landscape
+                euler.setFromQuaternion(quaternion, angleOrder);
                 this.x_ = euler.x;
                 this.y_ = euler.y;
                 this.z_ = euler.z;
