@@ -35,6 +35,7 @@ if('RelativeOrientationSensor' in window) {
             this.pitch_ = 0;
             this.roll_ = 0;
             this.direction_ = null;
+            this.angle_ = 0;
             this.func_ = null;
 
             super.onreading = () => {
@@ -57,18 +58,21 @@ if('RelativeOrientationSensor' in window) {
                 this.pitch_ = euler.y;
                 this.roll_ = euler.z;
 
-                // Calculate tilt direction
+                // Calculate tilt direction and angle
                 // Here need to account for the screen orientation
                 switch(screen.orientation.angle) {
                     default:
                     case 0:
                         this.pitch_ < 0 ? this.direction_ = "left" : this.direction_ = "right";
+                        this.angle_ = Math.abs(this.pitch_);
                     break;
                     case 90:
                         this.yaw_ < 0 ? this.direction_ = "left" : this.direction_ = "right";
+                        this.angle_ = Math.abs(this.yaw_);
                     break;
                     case 270:
                         this.yaw_ < 0 ? this.direction_ = "right" : this.direction_ = "left";
+                        this.angle_ = Math.abs(this.yaw_);
                     break;
                 }
 
@@ -93,6 +97,10 @@ if('RelativeOrientationSensor' in window) {
 
         get direction() {
                 return this.direction_;
+        }
+
+        get angle() {
+                return this.angle_;
         }
     }
 } else {
@@ -119,6 +127,10 @@ if('RelativeOrientationSensor' in window) {
 
         get direction() {
             return null;
+        }
+
+        get angle() {
+            return 0;
         }
     }
 
@@ -570,20 +582,8 @@ function opponentPaddleMovement() {
 
 // Handles player's paddle movement
 function playerPaddleMovement() {
-        let direction = tiltSensor.direction;
-        let force = 0;
-        switch(screen.orientation.angle) {
-            default:
-            case 0:
-                force = Math.abs(tiltSensor.pitch);
-            break;
-            case 90:
-                force = Math.abs(tiltSensor.yaw);
-            break;
-            case 270:
-                force = Math.abs(tiltSensor.yaw);
-            break;
-        }
+    let direction = tiltSensor.direction;
+    let force = tiltSensor.angle;
 	if (direction === "left") {
 
 		// If the paddle is not touching the side of table then move
