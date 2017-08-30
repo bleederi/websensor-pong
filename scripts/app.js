@@ -51,6 +51,7 @@ if('RelativeOrientationSensor' in window) {
                 let angleOrder = null;
                 screen.orientation.angle === 0 ? angleOrder = 'ZYX' : angleOrder = 'ZXY';
                 euler.setFromQuaternion(quaternion, angleOrder);
+                console.log(euler);
                 this.x_ = euler.x;
                 this.y_ = euler.y;
                 this.z_ = euler.z;
