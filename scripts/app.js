@@ -689,9 +689,11 @@ function updateScoreboard(font, text) {
 
 function checkRestart() {
     if(shakeSensor.shaking) {
-        // Save the paddles
+
+        // Save the paddles so they don't have to be created again
         let paddle1 = player1.paddle;
         let paddle2 = player2.paddle;
+
         // Initialize players, variables and scene again
         player1 = new Player();
         player2 = new Player();
