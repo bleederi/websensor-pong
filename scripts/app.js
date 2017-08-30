@@ -104,7 +104,11 @@ class Player {
         }
 }
 
+// Camera constants
+const FOV = 50, ASPECT = 640 / 360, NEAR = 0.1, FAR = 10000;
+
 const container = document.getElementById("gameCanvas");
+
 //Sensor initialization
 var oriSensor = new RelativeInclinationSensor();
 var accelerometer = new ShakeSensor();
@@ -116,12 +120,7 @@ var scene = new THREE.Scene();
 
 var pointLight, spotLight;
 
-//Create camera
-const FOV = 50;
-const ASPECT = 640 / 360;
-const NEAR = 0.1;
-const FAR = 10000;
-var camera = new THREE.PerspectiveCamera(FOV, ASPECT, NEAR, FAR);
+var camera;
 
 // field variables
 var fieldWidth = 400, fieldHeight = 200;
@@ -177,6 +176,7 @@ if ('serviceWorker' in navigator) {
 function init()
 {
         //ThreeJS scene setup below
+        camera = new THREE.PerspectiveCamera(FOV, ASPECT, NEAR, FAR);
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio( window.devicePixelRatio );
 	scene.add(camera);
