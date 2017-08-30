@@ -113,7 +113,7 @@ if('RelativeOrientationSensor' in window) {
         }
     }
     // Inform the user that generic sensors are not enabled
-    document.getElementById("no-sensors").style.display = "block";
+    //document.getElementById("no-sensors").style.display = "block";
 }
 
 if('LinearAccelerationSensor' in window) {
@@ -147,7 +147,7 @@ if('LinearAccelerationSensor' in window) {
         }
     }
     // Inform the user that generic sensors are not enabled
-    document.getElementById("no-sensors").style.display = "block";
+    //document.getElementById("no-sensors").style.display = "block";
 }
 
 // Player class, represents a player
@@ -174,7 +174,7 @@ class Player {
 const FOV = 50, ASPECT = 640 / 360, NEAR = 0.1, FAR = 10000;
 
 // Required for a THREE.js scene
-var camera, scene, renderer, oriSensor;
+var camera, scene, renderer, oriSensor, accelerometer;
 
 var pointLight, spotLight;
 
