@@ -116,22 +116,38 @@ if('RelativeOrientationSensor' in window) {
     document.getElementById("no-sensors").style.display = "block";
 }
 
-//This is a shake detection sensor that uses Accelerometer
-class ShakeSensor extends LinearAccelerationSensor {
-        constructor() {
-                super();
-                this.shaking_ = false;
+if('LinearAccelerationSensor' in window) {
+//This is a shake detection sensor that uses LinearAccelerationSensor
+    window.ShakeSensor = class ShakeSensor extends LinearAccelerationSensor {
+        constructor(options) {
+            super(options);
+            this.shaking_ = false;
         }
         set onreading(func) {
-                super.onreading = () => {
-                        this.shaking_ = Math.hypot(this.x, this.y, this.z) > 20;
-                        func();
-                }            
+            super.onreading = () => {
+                this.shaking_ = Math.hypot(this.x, this.y, this.z) > 20;
+                func();
+            }            
         }
 
         get shaking() {
             return this.shaking_;
         }
+    }
+} else {
+    // Fake interface
+    window.ShakeSensor = class ShakeSensor {
+        constructor(options) {
+            this.start = function() {};
+        }
+        set onreading(func) {}            
+
+        get shaking() {
+            return false;
+        }
+    }
+    // Inform the user that generic sensors are not enabled
+    document.getElementById("no-sensors").style.display = "block";
 }
 
 // Player class, represents a player
