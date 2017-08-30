@@ -85,16 +85,6 @@ if('RelativeOrientationSensor' in window) {
             this.func_ = func;
         }
 
-        get yaw() {
-                return this.yaw_;
-        }
-        get pitch() {
-                return this.pitch_;
-        } 
-        get roll() {
-                return this.roll_;
-        }
-
         get direction() {
                 return this.direction_;
         }
@@ -112,18 +102,6 @@ if('RelativeOrientationSensor' in window) {
         }
 
         set onreading(func) {}
-
-        get yaw() {
-            return 0;
-        }
-
-        get pitch() {
-            return 0;
-        }
-
-        get roll() {
-            return 0;
-        }
 
         get direction() {
             return null;
@@ -582,14 +560,12 @@ function opponentPaddleMovement() {
 
 // Handles player's paddle movement
 function playerPaddleMovement() {
-    let direction = tiltSensor.direction;
-    let force = tiltSensor.angle;
-	if (direction === "left") {
+	if (tiltSensor.direction === "left") {
 
 		// If the paddle is not touching the side of table then move
 		if (player1.paddle.position.y < fieldHeight * 0.45)
 		{
-			paddle1DirY = paddleSpeed * force;
+			paddle1DirY = paddleSpeed * tiltSensor.angle;
 		} else {
 			paddle1DirY = 0;
 		}
@@ -597,7 +573,7 @@ function playerPaddleMovement() {
 	else if (direction === "right") {
 		if (player1.paddle.position.y > -fieldHeight * 0.45)
 		{
-			paddle1DirY = -paddleSpeed * force;
+			paddle1DirY = -paddleSpeed * tiltSensor.angle;
 		} else {
 			paddle1DirY = 0;
 		}
