@@ -27,6 +27,7 @@
 if('RelativeOrientationSensor' in window) {
     // This is an inclination sensor that uses RelativeOrientationSensor
     // and converts the quaternion to Euler angles, returning the longitude and latitude
+console.log('RelativeOrientationSensor' in window);
     window.RelativeInclinationSensor = class RelativeInclinationSensor extends RelativeOrientationSensor {
         constructor(options) {
             super(options);
