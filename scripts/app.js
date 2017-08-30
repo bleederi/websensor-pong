@@ -173,6 +173,10 @@ if ('serviceWorker' in navigator) {
         });
 }
 
+function asd() {
+
+}
+
 // This function sets up the three.js scene, initializes the sensors and adds the canvas to the DOM
 function init() {
 
@@ -186,6 +190,7 @@ function init() {
     renderer.setPixelRatio( window.devicePixelRatio );
 	scene.add(camera);
     oriSensor = new RelativeInclinationSensor( {frequency: 60} );
+    oriSensor.onreading = asd;
     accelerometer = new ShakeSensor( {frequency: 60} );
     accelerometer.onreading = () => { checkRestart(); };
 	
