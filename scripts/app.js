@@ -124,10 +124,10 @@ var ball;
 var radius = 5;
 var ballDirX = 1, ballDirY = 1;
 
-const ballSpeedInitial = 2;     //We want to store the initial ball speed value for later use
+const ballSpeedInitial = 2;     // The initial ball speed value stored for later use
 var ballSpeed = ballSpeedInitial;
 
-//Timer
+// Timer
 var time=0;
 var timerVar = null;
 
@@ -138,7 +138,7 @@ var winner = null;
 
 const maxScore = 7;
 
-//Opponent difficulty (between 0 and 1)
+// Opponent difficulty (between 0 and 1)
 var difficulty = 0.2;
 
 //For the scoreboard canvas
@@ -151,22 +151,22 @@ var shakingvar = 0;
 var prevAccelMag = null;
 const sensorFreq = 60;
 
-//Service worker registration
+// Service worker registration
 if ('serviceWorker' in navigator) {
         window.addEventListener('load', function() {
                 navigator.serviceWorker.register('sw.js').then(function(registration) {
-                        //Registration was successful
                 }, function(err) {
-                        //Registration failed
                 console.log('ServiceWorker registration failed: ', err);
                 });
         });
 }
 
+// This function sets up the three.js scene, initializes the sensors and adds the canvas to the DOM
 function init() {
 
     const container = document.getElementById("gameCanvas");
-    // ThreeJS scene setup below
+
+    // three.js scene setup below
     camera = new THREE.PerspectiveCamera(FOV, ASPECT, NEAR, FAR);
     scene = new THREE.Scene();
     renderer = new THREE.WebGLRenderer();
@@ -177,21 +177,21 @@ function init() {
     accelerometer = new ShakeSensor( {frequency: 60} );
     accelerometer.onreading = () => { checkRestart(); };
 	
-	//Set up all the objects in the scene (table, ball, paddles)	
+	// Set up all the objects in the scene (table, ball, paddles)	
 	createScene();
 
-        container.innerHTML = "";
 	container.appendChild(renderer.domElement);
-        //Sensor initialization
-        oriSensor.start();
-        accelerometer.start();
 
-        window.addEventListener( 'resize', onWindowResize, false );     //On window resize, also resize canvas so it fills the screen
+    //Sensor initialization
+    oriSensor.start();
+    accelerometer.start();
 
-        function onWindowResize() {
-                camera.updateProjectionMatrix();
-                renderer.setSize( window.innerWidth , window.innerHeight);
-        }
+    window.addEventListener( 'resize', onWindowResize, false );     //On window resize, also resize canvas so it fills the screen
+
+    function onWindowResize() {
+            camera.updateProjectionMatrix();
+            renderer.setSize( window.innerWidth , window.innerHeight);
+    }
 	
 	render();
         timerVar=setInterval(function(){time = time + 10;},10);  //Timer in ms, lowest possible value is 10, accurate enough though
