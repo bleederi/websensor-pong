@@ -27,7 +27,8 @@
 if('RelativeOrientationSensor' in window) {
 
     // This is a tilt sensor that uses RelativeOrientationSensor
-    // and converts the quaternion to Euler angles
+    // It converts the quaternion to Euler angles,
+    // and based on the angles calculates the tilting direction and angle of tilt
     window.TiltSensor = class RelativeInclinationSensor extends RelativeOrientationSensor {
         constructor(options) {
             super(options);
@@ -64,15 +65,15 @@ if('RelativeOrientationSensor' in window) {
                     default:
                     case 0:
                         this.pitch_ < 0 ? this.direction_ = "left" : this.direction_ = "right";
-                        this.angle_ = Math.abs(this.pitch_);
+                        this.angle_ = Math.sin(Math.abs(this.pitch_));
                     break;
                     case 90:
                         this.yaw_ < 0 ? this.direction_ = "left" : this.direction_ = "right";
-                        this.angle_ = Math.abs(this.yaw_);
+                        this.angle_ = Math.sin(Math.abs(this.yaw_));
                     break;
                     case 270:
                         this.yaw_ < 0 ? this.direction_ = "right" : this.direction_ = "left";
-                        this.angle_ = Math.abs(this.yaw_);
+                        this.angle_ = Math.sin(Math.abs(this.yaw_));
                     break;
                 }
 
