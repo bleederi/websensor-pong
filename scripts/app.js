@@ -25,40 +25,41 @@
 //This is an inclination sensor that uses RelativeOrientationSensor and converts the quaternion to Euler angles
 if('RelativeOrientationSensor' in window) {
     window.RelativeInclinationSensor = class RelativeInclinationSensor extends RelativeOrientationSensor {
-            constructor(options) {
+        constructor(options) {
             super(options);
             this.sensor_ = new RelativeOrientationSensor({ frequency: 60 });
             this.x_ = 0;
             this.y_ = 0;
             this.z_ = 0;
+        }
 
-            set onreading(func) {
-                super.onreading = () => {
-                    let quat = this.sensor_.quaternion;
-                    let quaternion = new THREE.Quaternion();        //Conversion to Euler angles done in THREE.js so we have to create a THREE.js object for holding the quaternion to convert from
-                    let euler = new THREE.Euler( 0, 0, 0);  //Will hold the Euler angles corresponding to the quaternion
-                    quaternion.set(quat[0], quat[1], quat[2], quat[3]);     //x,y,z,w
-                    //Order of rotations must be adapted depending on orientation - for portrait ZYX, for landscape ZXY
-                    let angleOrder = null;
-                    screen.orientation.angle === 0 ? angleOrder = 'ZYX' : angleOrder = 'ZXY';
-                    euler.setFromQuaternion(quaternion, angleOrder);     //ZYX works in portrait, ZXY in landscape
-                    this.x_ = euler.x;
-                    this.y_ = euler.y;
-                    this.z_ = euler.z;
-                    func();
-                };
-            }
-            start() { this.sensor_.start(); }
-            stop() { this.sensor_.stop(); }
-            get x() {
-                    return this.x_;
-            }
-            get y() {
-                    return this.y_;
-            } 
-            get z() {
-                    return this.z_;
-            }
+        set onreading(func) {
+            super.onreading = () => {
+                let quat = this.sensor_.quaternion;
+                let quaternion = new THREE.Quaternion();        //Conversion to Euler angles done in THREE.js so we have to create a THREE.js object for holding the quaternion to convert from
+                let euler = new THREE.Euler( 0, 0, 0);  //Will hold the Euler angles corresponding to the quaternion
+                quaternion.set(quat[0], quat[1], quat[2], quat[3]);     //x,y,z,w
+                //Order of rotations must be adapted depending on orientation - for portrait ZYX, for landscape ZXY
+                let angleOrder = null;
+                screen.orientation.angle === 0 ? angleOrder = 'ZYX' : angleOrder = 'ZXY';
+                euler.setFromQuaternion(quaternion, angleOrder);     //ZYX works in portrait, ZXY in landscape
+                this.x_ = euler.x;
+                this.y_ = euler.y;
+                this.z_ = euler.z;
+                func();
+            };
+        }
+        start() { this.sensor_.start(); }
+        stop() { this.sensor_.stop(); }
+        get x() {
+                return this.x_;
+        }
+        get y() {
+                return this.y_;
+        } 
+        get z() {
+                return this.z_;
+        }
     }
 } else {
     // Fake interface
