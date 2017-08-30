@@ -25,19 +25,21 @@
 // If generic sensors are enabled and RelativeOrientationSensor is defined, create class normally
 // Otherwise create a fake class
 if('RelativeOrientationSensor' in window) {
+
     // This is an inclination sensor that uses RelativeOrientationSensor
     // and converts the quaternion to Euler angles, returning the longitude and latitude
-console.log('RelativeOrientationSensor' in window);
     window.RelativeInclinationSensor = class RelativeInclinationSensor extends RelativeOrientationSensor {
         constructor(options) {
             super(options);
-            this.x_ = 0;
-            this.y_ = 0;
-            this.z_ = 0;
+            this.longitude_ = 0;
+            this.latitude_ = 0;
+            this.longitudeInitial_ = 0;
+            this.initialOriObtained_ = false;
         }
 
         set onreading(func) {
             super.onreading = () => {
+
                 // Conversion to Euler angles done in THREE.js so we have to create a
                 // THREE.js object for holding the quaternion to convert from
                 // Order x,y,z,w
@@ -52,24 +54,48 @@ console.log('RelativeOrientationSensor' in window);
                 let angleOrder = null;
                 screen.orientation.angle === 0 ? angleOrder = 'ZYX' : angleOrder = 'ZXY';
                 euler.setFromQuaternion(quaternion, angleOrder);
-                console.log(euler);
-                this.x_ = euler.x;
-                this.y_ = euler.y;
-                this.z_ = euler.z;
+                if (!this.initialOriObtained_) {
+
+                    // Initial longitude needed to make the initial camera orientation
+                    // the same every time
+                    this.longitudeInitial_ = -euler.z;
+                    if (screen.orientation.angle === 90) {
+                        this.longitudeInitial_ = this.longitudeInitial_ + Math.PI/2;
+                    }
+                    this.initialOriObtained_ = true;
+                }
+
+                // Device orientation changes need to be taken into account
+                // when reading the sensor values by adding offsets
+                // Also the axis of rotation might change
+                switch (screen.orientation.angle) {
+
+                    // In case there are other screen orientation angle values,
+                    // for example 180 degrees (not implemented in Chrome), default is used
+                    default:    
+                    case 0:
+                        this.longitude_ = -euler.z - this.longitudeInitial_;
+                        this.latitude_ = euler.x - Math.PI/2;
+                        break; 
+                    case 90:
+                        this.longitude_ = -euler.z - this.longitudeInitial_ + Math.PI/2;
+                        this.latitude_ = -euler.y - Math.PI/2;                 
+                        break;     
+                    case 270:
+                        this.longitude_ = -euler.z - this.longitudeInitial_ - Math.PI/2;
+                        this.latitude_ = euler.y - Math.PI/2;
+                        break;
+                }
                 func();
             };      
         }
 
-        get x() {
-            return this.x_;
+        get longitude() {
+            return this.longitude_;
         }
 
-        get y() {
-            return this.y_;
-        }
-
-        get z() {
-            return this.z_;
+        get latitude() {
+            return this.latitude_;
         }
     }
 } else {
@@ -81,20 +107,16 @@ console.log('RelativeOrientationSensor' in window);
 
         set onreading(func) {}
 
-        get x() {
+        get longitude() {
             return 0;
         }
 
-        get y() {
-            return 0;
-        }
-
-        get z() {
+        get latitude() {
             return 0;
         }
     }
     // Inform the user that generic sensors are not enabled
-    //document.getElementById("no-sensors").style.display = "block";
+    document.getElementById("no-sensors").style.display = "block";
 }
 
 //This is a shake detection sensor that uses Accelerometer
@@ -527,16 +549,16 @@ function playerPaddleMovement() {
         switch(screen.orientation.angle) {
                 default:
                 case 0:
-                        oriSensor.y < 0 ? direction = "left" : direction = "right";
-                        force = Math.abs(oriSensor.y);
+                        oriSensor.latitude < 0 ? direction = "left" : direction = "right";
+                        force = Math.abs(oriSensor.latitude);
                 break;
                 case 90:
-                        oriSensor.x < 0 ? direction = "left" : direction = "right";
-                        force = Math.abs(oriSensor.x);
+                        oriSensor.longitude < 0 ? direction = "left" : direction = "right";
+                        force = Math.abs(oriSensor.longitude);
                 break;
                 case 270:
-                        oriSensor.x < 0 ? direction = "right" : direction = "left";
-                        force = Math.abs(oriSensor.x);
+                        oriSensor.longitude < 0 ? direction = "right" : direction = "left";
+                        force = Math.abs(oriSensor.longitude);
                 break;
                 }
 	if (direction === "left")		
