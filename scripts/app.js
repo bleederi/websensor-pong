@@ -410,8 +410,8 @@ function render() {
 	opponentPaddleMovement();                  
 }
 
-function ballPhysics()
-{
+function ballPhysics() {
+
     // Increase ball speed with time
     ballSpeed = ballSpeedInitial + (ballSpeedInitial * time/10000);
 
@@ -422,72 +422,65 @@ function ballPhysics()
 	if (ball.position.x <= -fieldWidth/2) {	
 	    player2.increaseScore();
         resetBall(player2);
-        time = 0;       //Reset timer
+        time = 0;       // Reset timer
 
         //Update scoreboard only if no winner
-        if(winner === null)
-        {
+        if(winner === null) {
             updateScoreboard("Bold 40px Arial", player1.score + '-' + player2.score);
             matchScoreCheck();
         }
-	//Ball goes off the CPU's side - player scores
+
+	// Ball goes off the CPU's side - player scores
     } else if (ball.position.x >= fieldWidth/2) {
-	        player1.increaseScore();
-                resetBall(player1);
-                time = 0;
-                if(winner === null)
-                {
-                        updateScoreboard("Bold 40px Arial", player1.score + '-' + player2.score);
-		        matchScoreCheck();
-                }
+        player1.increaseScore();
+        resetBall(player1);
+        time = 0;
+        if(winner === null) {
+            updateScoreboard("Bold 40px Arial", player1.score + '-' + player2.score);
+            matchScoreCheck();
+        }
 	}
 	
-	//Bounce off table border to keep the ball on the table
-	if (ball.position.y <= -fieldHeight/2)
-	{
+	// Bounce off table border to keep the ball on the table
+	if (ball.position.y <= -fieldHeight/2) {
 		ballDirY = -ballDirY;
-	}	
-	else if (ball.position.y >= fieldHeight/2)
-	{
+    } else if (ball.position.y >= fieldHeight/2) {
 		ballDirY = -ballDirY;
 	}
 	
-	//Move the ball
+	// Move the ball
 	ball.position.x += ballDirX * ballSpeed;
 	ball.position.y += ballDirY * ballSpeed;
 	
-	//Limit ball's y-speed to make it easier (ball does not go too fast in left-right direction)
-        let maxYSpeed = Math.min(1.2 * ballSpeedInitial, ballSpeed);
-	if (ballDirY > maxYSpeed)
-	{
+	// Limit the ball's y-speed to make it easier
+    // (ball does not go too fast in left-right direction)
+    let maxYSpeed = Math.min(1.2 * ballSpeedInitial, ballSpeed);
+	if (ballDirY > maxYSpeed) {
 		ballDirY = maxYSpeed;
-	}
-	else if (ballDirY < -maxYSpeed)
-	{
+	} else if (ballDirY < -maxYSpeed) {
 		ballDirY = -maxYSpeed;
 	}
 }
 
 // Handles opponent paddle movement and logic
-function opponentPaddleMovement()
-{
-	// Lerp towards the ball on the y plane
+function opponentPaddleMovement() {
+	// Move towards the ball on the y plane
 	paddle2DirY = (ball.position.y - player2.paddle.position.y) * difficulty;
 	
-	// in case the Lerp function produces a value above max paddle speed, we clamp it
-	if (Math.abs(paddle2DirY) <= paddleSpeed)
-	{	
+	// In case the above produces a value above max paddle speed, we clamp it
+	if (Math.abs(paddle2DirY) <= paddleSpeed) {	
 		player2.paddle.position.y += paddle2DirY;
-	}
-	// if the lerp value is too high, we have to limit speed to paddleSpeed
-	else
-	{
-		// if paddle is lerping in +ve direction
+
+	// If the value is too high, we have to limit speed to paddleSpeed
+	} else {
+
+		// If the paddle is going in positive direction
 		if (paddle2DirY > paddleSpeed)
 		{
 			player2.paddle.position.y += paddleSpeed;
 		}
-		// if paddle is lerping in -ve direction
+
+		// If the paddle is going in negative direction
 		else if (paddle2DirY < -paddleSpeed)
 		{
 			player2.paddle.position.y -= paddleSpeed;
