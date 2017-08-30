@@ -18,6 +18,11 @@
  *
 */
 
+/*
+*       Pong demo using generic sensors
+*/
+
+
 //Inspired by http://buildnewgames.com/webgl-threejs/
 
 'use strict';
@@ -87,7 +92,7 @@ if('RelativeOrientationSensor' in window) {
         get angle() {
                 return this.angle_;
         }
-    }
+    };
 } else {
 
     // Fake interface
@@ -105,7 +110,7 @@ if('RelativeOrientationSensor' in window) {
         get angle() {
             return 0;
         }
-    }
+    };
 
     // Inform the user that generic sensors are not enabled
     document.getElementById("no-sensors").style.display = "block";
@@ -124,12 +129,12 @@ if('LinearAccelerationSensor' in window) {
                             this.shaking_ = Math.hypot(this.x, this.y, this.z) > 20;
                             func();
                     }            
-            }
+            };
 
             get shaking() {
                 return this.shaking_;
             }
-    }
+    };
 } else {
 
     // Fake interface
@@ -143,7 +148,7 @@ if('LinearAccelerationSensor' in window) {
         get shaking() {
             return false;
         }
-    }
+    };
 
     // Inform the user that generic sensors are not enabled
     document.getElementById("no-sensors").style.display = "block";
@@ -364,7 +369,7 @@ function createScene()  // A modified version of the scene from http://buildnewg
 	player2.paddle.position.z = paddleDepth;
 		
     // Create pillars
-	for (var i = 0; i < 5; i++) {
+	for (let i = 0; i < 5; i++) {
 		let backdrop = new THREE.Mesh(
 		
 		  new THREE.CubeGeometry( 
@@ -384,7 +389,7 @@ function createScene()  // A modified version of the scene from http://buildnewg
 		backdrop.receiveShadow = true;		  
 		scene.add(backdrop);	
 	}
-	for (var i=0; i<5; i++) {
+	for (let i=0; i<5; i++) {
 		var backdrop = new THREE.Mesh(
 
 		  new THREE.CubeGeometry( 
@@ -597,13 +602,13 @@ function cameraMovement() {
 function paddlePhysics() {
 	
 	// If the ball is aligned with paddle1 on x plane
-	if (ball.position.x <= player1.paddle.position.x + paddleWidth
-	&&  ball.position.x >= player1.paddle.position.x - paddleWidth)
+	if (ball.position.x <= player1.paddle.position.x + paddleWidth &&
+        ball.position.x >= player1.paddle.position.x - paddleWidth)
     {
 
 	    // And if the ball is aligned with paddle1 on y plane
-	    if (ball.position.y <= player1.paddle.position.y + paddleHeight/2
-	    &&  ball.position.y >= player1.paddle.position.y - paddleHeight/2)
+	    if (ball.position.y <= player1.paddle.position.y + paddleHeight/2 &&
+            ball.position.y >= player1.paddle.position.y - paddleHeight/2)
 		{
 
 			// And if the ball is travelling towards player
@@ -619,11 +624,11 @@ function paddlePhysics() {
 	}
 
     // Same for opponent paddle
-	if (ball.position.x <= player2.paddle.position.x + paddleWidth
-	&&  ball.position.x >= player2.paddle.position.x - paddleWidth)
+	if (ball.position.x <= player2.paddle.position.x + paddleWidth &&
+        ball.position.x >= player2.paddle.position.x - paddleWidth)
 	{
-		if (ball.position.y <= player2.paddle.position.y + paddleHeight/2
-		&&  ball.position.y >= player2.paddle.position.y - paddleHeight/2)
+		if (ball.position.y <= player2.paddle.position.y + paddleHeight/2 &&
+            ball.position.y >= player2.paddle.position.y - paddleHeight/2)
 		{
 			if (ballDirX > 0) {
 				ballDirX = -ballDirX;
