@@ -22,48 +22,98 @@
 
 'use strict';
 
-//This is an inclination sensor that uses RelativeOrientationSensor and converts the quaternion to Euler angles
-class RelativeInclinationSensor {
-        constructor() {
-        this.sensor_ = new RelativeOrientationSensor({ frequency: 60 });
-        this.x_ = 0;
-        this.y_ = 0;
-        this.z_ = 0;
-        this.sensor_.onreading = () => {
-                let quat = this.sensor_.quaternion;
-                let quaternion = new THREE.Quaternion();        //Conversion to Euler angles done in THREE.js so we have to create a THREE.js object for holding the quaternion to convert from
-                let euler = new THREE.Euler( 0, 0, 0);  //Will hold the Euler angles corresponding to the quaternion
-                quaternion.set(quat[0], quat[1], quat[2], quat[3]);     //x,y,z,w
-                //Order of rotations must be adapted depending on orientation - for portrait ZYX, for landscape ZXY
+// If generic sensors are enabled and RelativeOrientationSensor is defined, create class normally
+// Otherwise create a fake class
+if('RelativeOrientationSensor' in window) {
+    // This is an inclination sensor that uses RelativeOrientationSensor
+    // and converts the quaternion to Euler angles, returning the longitude and latitude
+    window.RelativeInclinationSensor = class RelativeInclinationSensor extends RelativeOrientationSensor {
+        constructor(options) {
+            super(options);
+            this.longitude_ = 0;
+            this.latitude_ = 0;
+            this.longitudeInitial_ = 0;
+            this.initialOriObtained_ = false;
+        }
+
+        set onreading(func) {
+            super.onreading = () => {
+                // Conversion to Euler angles done in THREE.js so we have to create a
+                // THREE.js object for holding the quaternion to convert from
+                // Order x,y,z,w
+                let quaternion = new THREE.Quaternion(super.quaternion[0], super.quaternion[1],
+                                                      super.quaternion[2], super.quaternion[3]);
+
+                // euler will hold the Euler angles corresponding to the quaternion
+                let euler = new THREE.Euler(0, 0, 0);
+
+                // Order of rotations must be adapted depending on orientation
+                // for portrait ZYX, for landscape ZXY
                 let angleOrder = null;
                 screen.orientation.angle === 0 ? angleOrder = 'ZYX' : angleOrder = 'ZXY';
-                euler.setFromQuaternion(quaternion, angleOrder);     //ZYX works in portrait, ZXY in landscape
-                this.x_ = euler.x;
-                this.y_ = euler.y;
-                this.z_ = euler.z;
-                if (this.onreading_) this.onreading_();
-        };
+                euler.setFromQuaternion(quaternion, angleOrder);
+                if (!this.initialOriObtained_) {
+
+                    // Initial longitude needed to make the initial camera orientation
+                    // the same every time
+                    this.longitudeInitial_ = -euler.z;
+                    if (screen.orientation.angle === 90) {
+                        this.longitudeInitial_ = this.longitudeInitial_ + Math.PI/2;
+                    }
+                    this.initialOriObtained_ = true;
+                }
+
+                // Device orientation changes need to be taken into account
+                // when reading the sensor values by adding offsets
+                // Also the axis of rotation might change
+                switch (screen.orientation.angle) {
+                    // In case there are other screen orientation angle values,
+                    // for example 180 degrees (not implemented in Chrome), default is used
+                    default:    
+                    case 0:
+                        this.longitude_ = -euler.z - this.longitudeInitial_;
+                        this.latitude_ = euler.x - Math.PI/2;
+                        break; 
+                    case 90:
+                        this.longitude_ = -euler.z - this.longitudeInitial_ + Math.PI/2;
+                        this.latitude_ = -euler.y - Math.PI/2;                 
+                        break;     
+                    case 270:
+                        this.longitude_ = -euler.z - this.longitudeInitial_ - Math.PI/2;
+                        this.latitude_ = euler.y - Math.PI/2;
+                        break;
+                }
+                func();
+            };      
         }
-        start() { this.sensor_.start(); }
-        stop() { this.sensor_.stop(); }
-        get x() {
-                return this.x_;
+
+        get longitude() {
+            return this.longitude_;
         }
-        get y() {
-                return this.y_;
-        } 
-        get z() {
-                return this.z_;
+
+        get latitude() {
+            return this.latitude_;
         }
-        set onactivate(func) {
-                this.sensor_.onactivate_ = func;
+    }
+} else {
+    // Fake interface
+    window.RelativeInclinationSensor = class RelativeInclinationSensor {
+        constructor(options) {
+            this.start = function() {};
         }
-        set onerror(err) {
-                this.sensor_.onerror_ = err;
+
+        set onreading(func) {}
+
+        get longitude() {
+            return 0;
         }
-        set onreading (func) {
-                this.onreading_ = func;  
+
+        get latitude() {
+            return 0;
         }
+    }
+    // Inform the user that generic sensors are not enabled
+    document.getElementById("no-sensors").style.display = "block";
 }
 
 //This is a shake detection sensor that uses Accelerometer
@@ -84,7 +134,7 @@ class ShakeSensor extends LinearAccelerationSensor {
         }
 }
 
-//Player class, represents a player
+// Player class, represents a player
 class Player {
         constructor() {
         this.score_ = 0;
@@ -104,24 +154,18 @@ class Player {
         }
 }
 
-const container = document.getElementById("gameCanvas");
-//Sensor initialization
+// Camera constants
+const FOV = 50, ASPECT = 640 / 360, NEAR = 0.1, FAR = 10000;
+
+// Required for a THREE.js scene
+var camera, scene, renderer, oriSensor;
+
+// Sensor initialization
 var oriSensor = new RelativeInclinationSensor();
 var accelerometer = new ShakeSensor();
 accelerometer.onreading = () => { checkRestart(); };
 
-//Required for a THREE.js scene
-var renderer = new THREE.WebGLRenderer();
-var scene = new THREE.Scene();
-
 var pointLight, spotLight;
-
-//Create camera
-const FOV = 50;
-const ASPECT = 640 / 360;
-const NEAR = 0.1;
-const FAR = 10000;
-var camera = new THREE.PerspectiveCamera(FOV, ASPECT, NEAR, FAR);
 
 // field variables
 var fieldWidth = 400, fieldHeight = 200;
@@ -174,31 +218,37 @@ if ('serviceWorker' in navigator) {
         });
 }
 
-function init()
-{
-        //ThreeJS scene setup below
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio( window.devicePixelRatio );
+function init() {
+
+    const container = document.getElementById("gameCanvas");
+
+    // Required for a THREE.js scene
+    camera = new THREE.PerspectiveCamera(FOV, ASPECT, NEAR, FAR);
+    scene = new THREE.Scene();
+    renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio( window.devicePixelRatio );
 	scene.add(camera);
 	
-	//Set up all the objects in the scene (table, ball, paddles)	
+	// Set up all the objects in the scene (table, ball, paddles)	
 	createScene();
 
-        container.innerHTML = "";
 	container.appendChild(renderer.domElement);
-        //Sensor initialization
-        oriSensor.start();
-        accelerometer.start();
 
-        window.addEventListener( 'resize', onWindowResize, false );     //On window resize, also resize canvas so it fills the screen
+    // Sensor initialization
+    oriSensor.start();
+    accelerometer.start();
 
-        function onWindowResize() {
-                camera.updateProjectionMatrix();
-                renderer.setSize( window.innerWidth , window.innerHeight);
-        }
+    // On window resize, also resize canvas so it fills the screen
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    }, false);
 	
 	render();
-        timerVar=setInterval(function(){time = time + 10;},10);  //Timer in ms, lowest possible value is 10, accurate enough though
+
+    timerVar=setInterval(function(){time = time + 10;},10);  // Timer in ms, lowest possible value is 10, accurate enough though
 }
 
 function createScene()  //A modified version of the scene from http://buildnewgames.com/webgl-threejs/
