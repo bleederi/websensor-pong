@@ -27,10 +27,9 @@ if('RelativeOrientationSensor' in window) {
     window.RelativeInclinationSensor = class RelativeInclinationSensor extends RelativeOrientationSensor {
         constructor(options) {
             super(options);
-            //this.sensor_ = new RelativeOrientationSensor({ frequency: 60 });
-            this.x_ = 0;
-            this.y_ = 0;
-            this.z_ = 0;
+            this.yaw_ = 0;
+            this.pitch_ = 0;
+            this.roll_ = 0;
             this.func_ = null;
 
             super.onreading = () => {
@@ -49,9 +48,9 @@ if('RelativeOrientationSensor' in window) {
                 let angleOrder = null;
                 screen.orientation.angle === 0 ? angleOrder = 'ZYX' : angleOrder = 'ZXY';
                 euler.setFromQuaternion(quaternion, angleOrder);
-                this.x_ = euler.x;
-                this.y_ = euler.y;
-                this.z_ = euler.z;
+                this.yaw_ = euler.x;
+                this.pitch_ = euler.y;
+                this.roll_ = euler.z;
                 if (this.func_ != null)
                     this.func_();
             };
@@ -62,13 +61,13 @@ if('RelativeOrientationSensor' in window) {
         }
 
         get x() {
-                return this.x_;
+                return this.yaw_;
         }
         get y() {
-                return this.y_;
+                return this.pitch_;
         } 
         get z() {
-                return this.z_;
+                return this.roll_;
         }
     }
 } else {
